@@ -4,4 +4,3 @@
 HRESULT InitD3D();
 void Render();
 void SetViewFromCamera(camera& cam);
-void PositionCamera(camera& cam);

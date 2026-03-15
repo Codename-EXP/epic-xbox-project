@@ -129,12 +129,6 @@ void Input_GetSticks(int& lx, int& ly, int& rx, int& ry)
         rx = gp.sThumbRX;
         ry = gp.sThumbRY;
 
-        // Deadzone filtering
-        if (abs(lx) < STICK_DEADZONE) lx = 0;
-        if (abs(ly) < STICK_DEADZONE) ly = 0;
-        if (abs(rx) < STICK_DEADZONE) rx = 0;
-        if (abs(ry) < STICK_DEADZONE) ry = 0;
-
         return; // first connected pad only
     }
 }

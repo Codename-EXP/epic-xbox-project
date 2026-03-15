@@ -29,8 +29,7 @@ void __cdecl main()
         Input_Poll();
 
         MoveCamera(main_camera);
-        //SetViewFromCamera(main_camera);
-        PositionCamera(main_camera);
+        SetViewFromCamera(main_camera);
         // Render the scene
         Render();
 

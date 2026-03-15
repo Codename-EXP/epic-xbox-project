@@ -154,7 +154,6 @@ void SetViewFromCamera(camera& cam)
     forward.y = sinf(cam.transform.pitch);
     forward.z = cosf(cam.transform.pitch) * cosf(cam.transform.yaw);
 
-
     // Look-at target = eye + forward
     D3DXVECTOR3 at = cam.transform.pos + forward;
 
@@ -164,36 +163,6 @@ void SetViewFromCamera(camera& cam)
     // Build view matrix
     D3DXMATRIX matView;
     D3DXMatrixLookAtLH(&matView, &cam.transform.pos, &at, &up);
-    g_pd3dDevice->SetTransform(D3DTS_VIEW, &matView);
-
-    // proj
-    D3DXMATRIX matProj;
-    D3DXMatrixPerspectiveFovLH(&matProj, D3DXToRadian(90.0f), 640.0f / 480.0f, 0.1f, 50.0f);
-    g_pd3dDevice->SetTransform(D3DTS_PROJECTION, &matProj);
-}
-void PositionCamera(camera& cam)
-{
-    float yaw = cam.transform.yaw;
-    float pitch = cam.transform.pitch;
-    //123
-    // Build forward vector from yaw + pitch
-    D3DXVECTOR3 forward;
-    forward.x = cosf(pitch) * sinf(yaw);
-    forward.y = sinf(pitch);
-    forward.z = cosf(pitch) * cosf(yaw);
-
-    // Camera position
-    D3DXVECTOR3 eye(cam.transform.pos.x, cam.transform.pos.y, cam.transform.pos.z);
-
-    // Look-at target = eye + forward
-    D3DXVECTOR3 at = eye + forward;
-
-    // Standard world up
-    D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
-
-    // Build view matrix
-    D3DXMATRIX matView;
-    D3DXMatrixLookAtLH(&matView, &eye, &at, &up);
     g_pd3dDevice->SetTransform(D3DTS_VIEW, &matView);
 
     // proj
@@ -216,57 +185,45 @@ void Render()
     // Begin the scene
     g_pd3dDevice->BeginScene();
 
-    // Draw the triangles in the vertex buffer. This is broken into a few
-    // steps. We are passing the vertices down a "stream", so first we need
-    // to specify the source of that stream, which is our vertex buffer. Then
-    // we need to let D3D know what vertex shader to use. Full, custom vertex
-    // shaders are an advanced topic, but in many cases the vertex shader is
-    // just the FVF, so that D3D knows what type of vertices we are dealing
-    // with. Finally, we call DrawPrimitive() which does the actual rendering
-    // of our geometry (in this case, just one triangle).
-
 
 
     D3DXMATRIX matRotate;
-    static float angle = 0.0f;
-    angle += 0.02f; // animate
-    FLOAT fZRotate = angle;
-    D3DXMatrixRotationYawPitchRoll(&matRotate, 0.0f, 0.0f, fZRotate);
+    D3DXMatrixRotationYawPitchRoll(&matRotate, 0.0f, 0.0f, 0.02f);
     D3DXMatrixMultiply(&triangle_mat, &triangle_mat, &matRotate);
     g_pd3dDevice->SetTransform(D3DTS_WORLD, &triangle_mat);
 
-    // Ensure viewport is set and device is ready
-    D3DVIEWPORT8 vp;
-    vp.X = 0; vp.Y = 0; vp.Width = 640; vp.Height = 480; vp.MinZ = 0.0f; vp.MaxZ = 1.0f;
-    g_pd3dDevice->SetViewport(&vp);
+    //// Ensure viewport is set and device is ready
+    //D3DVIEWPORT8 vp;
+    //vp.X = 0; vp.Y = 0; vp.Width = 640; vp.Height = 480; vp.MinZ = 0.0f; vp.MaxZ = 1.0f;
+    //g_pd3dDevice->SetViewport(&vp);
 
     // Set FVF and stream source
     g_pd3dDevice->SetVertexShader(D3DFVF_CUSTOMVERTEX);
     g_pd3dDevice->SetStreamSource(0, g_pVB, sizeof(CUSTOMVERTEX));
+    g_pd3dDevice->SetTexture(0, s_smokeTex);
 
     // Ensure common render states for solid geometry
-    g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    g_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-    g_pd3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-    g_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-    // Bind texture if available; otherwise rely on vertex diffuse color
-    if (s_smokeTex) {
-        g_pd3dDevice->SetTexture(0, s_smokeTex);
-        // Modulate texture with vertex color
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    } else {
-        g_pd3dDevice->SetTexture(0, NULL);
-        // Use vertex diffuse color only so geometry is visible without a texture
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
-        g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    }
+    //g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+    //g_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+    //g_pd3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+    //g_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+    //// Bind texture if available; otherwise rely on vertex diffuse color
+    //if (s_smokeTex) {
+    //    // Modulate texture with vertex color
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    //} else {
+    //    g_pd3dDevice->SetTexture(0, NULL);
+    //    // Use vertex diffuse color only so geometry is visible without a texture
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
+    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    //}
     g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
     g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
     g_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

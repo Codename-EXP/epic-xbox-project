@@ -2,7 +2,6 @@
 #include <xtl.h>
 #define MAX_PORTS 4
 #define ANALOG_THRESHOLD 30       // 0..255 analog-button threshold
-#define STICK_DEADZONE  8000      // stick deadzone for GetSticks()
 enum
 {
     BTN_DPAD_UP = XINPUT_GAMEPAD_DPAD_UP,
