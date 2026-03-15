@@ -33,10 +33,13 @@
     <ClCompile Include="SRC\Engine\Graphics\Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Engine\Entities\Entity.cpp">
+    <ClCompile Include="SRC\Engine\Objects\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Engine\Player\PlayerCamera.cpp">
+    <ClCompile Include="SRC\Engine\Objects\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Engine\Objects\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +56,13 @@
     <ClInclude Include="SRC\Engine\Graphics\Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SRC\Engine\Entities\Entity.h">
+    <ClInclude Include="SRC\Engine\Objects\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SRC\Engine\Player\PlayerCamera.h">
+    <ClInclude Include="SRC\Engine\Objects\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRC\Engine\Objects\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

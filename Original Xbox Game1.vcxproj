@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -166,20 +166,23 @@ MKDIR "$(OutDir)XISO"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SRC\Engine\Entities\Entity.cpp" />
+    <ClCompile Include="SRC\Engine\Objects\Entity.cpp" />
+    <ClCompile Include="SRC\Engine\Objects\Transform.cpp" />
     <ClCompile Include="SRC\Engine\Graphics\Graphics.cpp" />
     <ClCompile Include="SRC\Engine\Input\input.cpp" />
     <ClCompile Include="SRC\Engine\Player\Player.cpp" />
-    <ClCompile Include="SRC\Engine\Player\PlayerCamera.cpp" />
+    <ClCompile Include="SRC\Engine\Objects\Camera.cpp" />
     <ClCompile Include="SRC\Engine\Player\PlayerControls.cpp" />
     <ClCompile Include="SRC\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SRC\Engine\Entities\Entity.h" />
+    <ClInclude Include="SRC\Engine\Constants\DislayConst.h" />
+    <ClInclude Include="SRC\Engine\Objects\Entity.h" />
+    <ClInclude Include="SRC\Engine\Objects\Transform.h" />
     <ClInclude Include="SRC\Engine\Graphics\Graphics.h" />
     <ClInclude Include="SRC\Engine\Input\input.h" />
     <ClInclude Include="SRC\Engine\Player\Player.h" />
-    <ClInclude Include="SRC\Engine\Player\PlayerCamera.h" />
+    <ClInclude Include="SRC\Engine\Objects\Camera.h" />
     <ClInclude Include="SRC\Engine\Player\PlayerControls.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,8 @@
 #pragma once
 #include <xtl.h>
-// -----------------------------------------------------------------------------
-// Unified digital mask used everywhere.
-//
-// Notes:
-// - D-Pad, START/BACK, thumb clicks = native XINPUT bits.
-// - ABXY = high-bit synthetic flags derived from analog buttons.
-// -----------------------------------------------------------------------------
-
+#define MAX_PORTS 4
+#define ANALOG_THRESHOLD 30       // 0..255 analog-button threshold
+#define STICK_DEADZONE  8000      // stick deadzone for GetSticks()
 enum
 {
     BTN_DPAD_UP = XINPUT_GAMEPAD_DPAD_UP,
@@ -26,22 +21,12 @@ enum
     BTN_X = 0x4000,
     BTN_Y = 0x8000,
 };
-
-// -----------------------------------------------------------------------------
-// API
-// -----------------------------------------------------------------------------
-
-// Initialize controller ports.
-void InitInput();
-
-// Polls & updates button state + analog stick state.
-void PollInput();
+void Input_Init();
+void Input_Poll();
 
 // Returns OR of all controller button masks (BTN_* flags above).
-WORD GetButtons();
+WORD Input_GetButtons();
 
-// NEW: returns left/right stick raw 16-bit values.
-// If no controller present: all zeros.
 //   lx,ly = left stick   (-32768 .. 32767)
 //   rx,ry = right stick  (-32768 .. 32767)
-void GetSticks(int& lx, int& ly, int& rx, int& ry);
+void Input_GetSticks(int& lx, int& ly, int& rx, int& ry);

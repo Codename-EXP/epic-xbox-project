@@ -1,8 +1,5 @@
 ﻿#include "input.h"
 
-#define MAX_PORTS 4
-#define ANALOG_THRESHOLD 30       // 0..255 analog-button threshold
-#define STICK_DEADZONE  8000      // stick deadzone for GetSticks()
 
 static HANDLE       g_padHandles[MAX_PORTS];
 static DWORD        g_padLastPacket[MAX_PORTS];
@@ -12,7 +9,7 @@ static WORD         g_padButtons[MAX_PORTS];   // synthesized BTN_* mask
 // -----------------------------------------------------------------------------
 // InitInput
 // -----------------------------------------------------------------------------
-void InitInput()
+void Input_Init()
 {
     XInitDevices(0, 0);
     memset(g_padHandles, 0, sizeof(g_padHandles));
@@ -24,7 +21,7 @@ void InitInput()
 // -----------------------------------------------------------------------------
 // PollInput  – reads controller state + synthesizes BTN_*
 // -----------------------------------------------------------------------------
-void PollInput()
+void Input_Poll()
 {
     DWORD ins = 0, rem = 0;
 
@@ -103,7 +100,7 @@ void PollInput()
 // -----------------------------------------------------------------------------
 // GetButtons – returns synthesized unified mask from first connected pad
 // -----------------------------------------------------------------------------
-WORD GetButtons()
+WORD Input_GetButtons()
 {
     for (int i = 0; i < MAX_PORTS; ++i)
     {
@@ -116,7 +113,7 @@ WORD GetButtons()
 // -----------------------------------------------------------------------------
 // GetSticks – returns left/right analog sticks (with deadzones)
 // -----------------------------------------------------------------------------
-void GetSticks(int& lx, int& ly, int& rx, int& ry)
+void Input_GetSticks(int& lx, int& ly, int& rx, int& ry)
 {
     lx = ly = rx = ry = 0;
 
