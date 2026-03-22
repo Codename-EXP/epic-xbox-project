@@ -1,0 +1,26 @@
+// Xbox Shader Assembler 1.00.5933.1
+// instructions: 12
+xvs.1.1
+#pragma screenspace
+/*slot stall */
+/*   0        */  mov r0.xyz, c4.xyz
+                 +   mov oT0.x, v0.w
+/*   1        */  mov r9.x, c6.x
+                 +   mov oT0.y, v2.w
+/*   2        */  add r7.xyz, -r0.xyz, c5.xyz
+/*   3 C 0.50 */  mad r9.yzw, r7.xxyz, v0.xxyz, c4.xxyz
+/*   4        */  nop 
+/*   5 D 0.20 */  dp4 oPos.x, r9.yzwx, c0
+/*   6        */  dp4 oPos.y, r9.yzwx, c1
+/*   7        */  dp4 oPos.z, r9.yzwx, c2
+/*   8        */  dp4 oPos.w, r9.yzwx, c3
+/*   9        */  mul oPos.xyz, r12.xyz, c-38.xyz
+/*  10        */  rcc r11.x, r12.w
+/*  11 C 0.50 */  mad oPos.xyz, r12.xyz, r11.x, c-37.xyz
+
+//Stall Types:
+//C: standard stall
+//D: shadow-stall from using a register two instructions after it stalled
+
+//    microcode: 12 slots, 7.2 cycles, cpi = 0.6
+// Optimization saved 0 slots, 0.8 cycles.

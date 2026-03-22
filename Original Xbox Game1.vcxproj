@@ -176,6 +176,7 @@ MKDIR "$(OutDir)XISO"
     <ClCompile Include="SRC\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SRC\Engine\Constants\ctint.h" />
     <ClInclude Include="SRC\Engine\Constants\DislayConst.h" />
     <ClInclude Include="SRC\Engine\Objects\Entity.h" />
     <ClInclude Include="SRC\Engine\Objects\Transform.h" />
@@ -184,12 +185,15 @@ MKDIR "$(OutDir)XISO"
     <ClInclude Include="SRC\Engine\Player\Player.h" />
     <ClInclude Include="SRC\Engine\Objects\Camera.h" />
     <ClInclude Include="SRC\Engine\Player\PlayerControls.h" />
+    <ClInclude Include="SRC\External\Blender\all_meshes_export.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Media\Copy Assets Here.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="SRC\External\Blender\ExportSceneToBinary.py" />
+    <None Include="SRC\External\Blender\ExportSceneToHeaders.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

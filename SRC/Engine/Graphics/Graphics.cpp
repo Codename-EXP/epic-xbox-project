@@ -1,6 +1,7 @@
 #include "Graphics.h"
 
-
+#include "../../External/HLSL/vert1.h" 
+#include "../../External/Blender/all_meshes_export.h" 
 //-----------------------------------------------------------------------------
 // Global variables
 //-----------------------------------------------------------------------------
@@ -8,14 +9,9 @@ LPDIRECT3D8             g_pD3D = NULL; // Used to create the D3DDevice
 LPDIRECT3DDEVICE8       g_pd3dDevice = NULL; // Our rendering device
 LPDIRECT3DVERTEXBUFFER8 g_pVB = NULL; // Buffer to hold vertices
 LPDIRECT3DVERTEXBUFFER8 g_p2VB = NULL; // Buffer to hold vertices
+LPDIRECT3DINDEXBUFFER8  g_pIB = NULL; // Buffer to hold indices
+LPDIRECT3DINDEXBUFFER8  g_p2IB = NULL; // Buffer to hold indices
 
-// A structure for our custom vertex type
-struct CUSTOMVERTEX
-{
-    float x, y, z; // The vertex position
-    DWORD color;   // The vertex color
-    float u, v;
-};
 
 // Our custom FVF, which describes our custom vertex structure
 #define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)
@@ -49,59 +45,46 @@ static void LoadSmokeTexture()
 D3DXMATRIX triangle_mat;
 HRESULT InitVB()
 {
-    // Initialize three vertices for rendering a triangle
-    CUSTOMVERTEX g_Vertices[] =
-    {
-        // Use opaque colors (0xAARRGGBB) and place triangle at z = -1 in world
-        {  0.0f, -1.1547f, -1.0f, 0xFFFF0000, 0.0f, 1.0f }, // x, y, z, color
-        { -1.0f,  0.5777f, -1.0f, 0xFF00FFFF, 1.0f, 0.0f },
-        {  1.0f,  0.5777f, -1.0f, 0xFF00FF00, 0.0f, 0.0f },
-    };
-    // Initialize three vertices for rendering a square
-    CUSTOMVERTEX g_2Vertices[] =
-    {
-        {  5.0f, -1.0f,  5.0f, 0xFFFF0000, 0.0f, 0.0f }, // x, y, z, color
-        {  5.0f, -1.0f, -5.0f, 0xFF00FF00, 0.0f, 1.0f },
-        { -5.0f, -1.0f,  5.0f, 0xFF00FFFF, 1.0f, 0.0f },
 
+    // setup vertex buffers
 
-        { -5.0f, -1.0f,  5.0f, 0xFF00FFFF, 1.0f, 0.0f }, // x, y, z, color
-        {  5.0f, -1.0f, -5.0f, 0xFF00FF00, 0.0f, 1.0f },
-        { -5.0f, -1.0f, -5.0f, 0xFFFF0000, 1.0f, 1.0f },
-    };
-
-    // Create the vertex buffer. Here we are allocating enough memory
-    // (from the default pool) to hold all our 3 custom vertices. We also
-    // specify the FVF, so the vertex buffer knows what data it contains.
-    if (FAILED(g_pd3dDevice->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX),
-        D3DUSAGE_WRITEONLY,
-        D3DFVF_CUSTOMVERTEX,
-        D3DPOOL_MANAGED, &g_pVB)))
+    if (FAILED(g_pd3dDevice->CreateVertexBuffer(sizeof(g_Cube_Vertices), 0, 0, 0, &g_pVB)))
         return E_FAIL;
 
-    if (FAILED(g_pd3dDevice->CreateVertexBuffer(6 * sizeof(CUSTOMVERTEX),
-        D3DUSAGE_WRITEONLY,
-        D3DFVF_CUSTOMVERTEX,
-        D3DPOOL_MANAGED, &g_p2VB)))
+    if (FAILED(g_pd3dDevice->CreateVertexBuffer(sizeof(g_Cube001_Vertices), 0, 0, 0, &g_p2VB)))
         return E_FAIL;
 
-    // Now we fill the vertex buffer. To do this, we need to Lock() the VB to
-    // gain access to the vertices. This mechanism is required because the
-    // vertex buffer may still be in use by the GPU. This can happen if the
-    // CPU gets ahead of the GPU. The GPU could still be rendering the previous
-    // frame.
-
-    CUSTOMVERTEX* pVertices;
-    if (FAILED(g_pVB->Lock(0, 0, (BYTE**)&pVertices, 0)))
+    void* vert_buffer;
+    if (FAILED(g_pVB->Lock(0, 0, (BYTE**)&vert_buffer, 0)))
         return E_FAIL;
-    memcpy(pVertices, g_Vertices, 3 * sizeof(CUSTOMVERTEX));
+    memcpy(vert_buffer, g_Cube_Vertices, sizeof(g_Cube_Vertices));
     g_pVB->Unlock();
 
-    CUSTOMVERTEX* p2Vertices;
-    if (FAILED(g_p2VB->Lock(0, 0, (BYTE**)&p2Vertices, 0)))
+    if (FAILED(g_p2VB->Lock(0, 0, (BYTE**)&vert_buffer, 0)))
         return E_FAIL;
-    memcpy(p2Vertices, g_2Vertices, 6 * sizeof(CUSTOMVERTEX));
+    memcpy(vert_buffer, g_Cube001_Vertices, sizeof(g_Cube001_Vertices));
     g_p2VB->Unlock();
+
+
+    // then do index buffers
+
+    if (FAILED(g_pd3dDevice->CreateIndexBuffer(sizeof(g_Cube_Indices), 0, D3DFMT_UNKNOWN, 0, &g_pIB)))
+        return E_FAIL;
+
+    if (FAILED(g_pd3dDevice->CreateIndexBuffer(sizeof(g_Cube001_Indices), 0, D3DFMT_UNKNOWN, 0, &g_p2IB)))
+        return E_FAIL;
+
+    void* index_buffer;
+    if (FAILED(g_pIB->Lock(0, 0, (BYTE**)&index_buffer, 0)))
+        return E_FAIL;
+    memcpy(index_buffer, g_Cube_Indices, sizeof(g_Cube_Indices));
+    g_pIB->Unlock();
+
+    if (FAILED(g_p2IB->Lock(0, 0, (BYTE**)&index_buffer, 0)))
+        return E_FAIL;
+    memcpy(index_buffer, g_Cube001_Indices, sizeof(g_Cube001_Indices));
+    g_p2IB->Unlock();
+
 
     D3DXMatrixIdentity(&triangle_mat);
 
@@ -110,7 +93,14 @@ HRESULT InitVB()
     return S_OK;
 }
 
-
+DWORD s_vsHandle = 0;
+const DWORD s_vsDecl[] =
+{
+    D3DVSD_STREAM(0),
+    D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_D3DCOLOR),
+    D3DVSD_REG(D3DVSDE_NORMAL,   D3DVSDT_D3DCOLOR),
+    D3DVSD_END()
+};
 
 //-----------------------------------------------------------------------------
 // Name: InitD3D()
@@ -138,6 +128,10 @@ HRESULT InitD3D()
     if (FAILED(g_pD3D->CreateDevice(0, D3DDEVTYPE_HAL, NULL,
         D3DCREATE_HARDWARE_VERTEXPROCESSING,
         &d3dpp, &g_pd3dDevice)))
+        return E_FAIL;
+
+
+    if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl, dwVert1VertexShader, &s_vsHandle, 0)))
         return E_FAIL;
 
     // Initialize the vertex buffer
@@ -187,98 +181,92 @@ void Render()
 
 
 
-    D3DXMATRIX matRotate;
-    D3DXMatrixRotationYawPitchRoll(&matRotate, 0.0f, 0.0f, 0.02f);
-    D3DXMatrixMultiply(&triangle_mat, &triangle_mat, &matRotate);
-    g_pd3dDevice->SetTransform(D3DTS_WORLD, &triangle_mat);
+    //D3DXMATRIX matRotate;
+    //D3DXMatrixRotationYawPitchRoll(&matRotate, 0.0f, 0.0f, 0.02f);
+    //D3DXMatrixMultiply(&triangle_mat, &triangle_mat, &matRotate);
+    //g_pd3dDevice->SetTransform(D3DTS_WORLD, &triangle_mat);
 
-    //// Ensure viewport is set and device is ready
-    //D3DVIEWPORT8 vp;
-    //vp.X = 0; vp.Y = 0; vp.Width = 640; vp.Height = 480; vp.MinZ = 0.0f; vp.MaxZ = 1.0f;
-    //g_pd3dDevice->SetViewport(&vp);
 
     // Set FVF and stream source
-    g_pd3dDevice->SetVertexShader(D3DFVF_CUSTOMVERTEX);
-    g_pd3dDevice->SetStreamSource(0, g_pVB, sizeof(CUSTOMVERTEX));
+    g_pd3dDevice->SetVertexShader(s_vsHandle);
+    //g_pd3dDevice->SetStreamSource(0, g_pVB, 8);
+    //g_pd3dDevice->SetIndices(g_pIB, 0);
     g_pd3dDevice->SetTexture(0, s_smokeTex);
 
-    // Ensure common render states for solid geometry
-    //g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    //g_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-    //g_pd3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-    //g_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-    //// Bind texture if available; otherwise rely on vertex diffuse color
-    //if (s_smokeTex) {
-    //    // Modulate texture with vertex color
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    //} else {
-    //    g_pd3dDevice->SetTexture(0, NULL);
-    //    // Use vertex diffuse color only so geometry is visible without a texture
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
-    //    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    //}
     g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
     g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
     g_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 
-    //g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    //g_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    //g_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
+    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
     g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
+    // disable subsequent stages
+    g_pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    g_pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+
+    // Ensure simple lighting settings
+    g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    g_pd3dDevice->SetRenderState(D3DRS_AMBIENT, 0x00FFFFFF);
+
+    D3DXMATRIX world, view, proj, wvp;
+    //g_pd3dDevice->GetTransform(D3DTS_WORLD, &world);
+    //g_pd3dDevice->GetTransform(D3DTS_VIEW, &view);
+    //g_pd3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
+    //wvp = world * view * proj;
+    //g_pd3dDevice->SetVertexShaderConstant(0, &wvp, 4);
+    float c6[4] = { 1.0f, 2.0f, 0.0f, 0.0f };
+    //g_pd3dDevice->SetVertexShaderConstant(4, g_Cube_PosMin, 1);
+    //g_pd3dDevice->SetVertexShaderConstant(5, g_Cube_PosMax, 1);
+    //g_pd3dDevice->SetVertexShaderConstant(6, c6, 1);
 
 
-
-
-        g_pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
-
+    //g_pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+    //g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,0, 0, g_Cube_IndexCount);
 
     D3DXMATRIX quad_mat;
     D3DXMatrixIdentity(&quad_mat);
     g_pd3dDevice->SetTransform(D3DTS_WORLD, &quad_mat);
-    g_pd3dDevice->SetStreamSource(0, g_p2VB, sizeof(CUSTOMVERTEX));
-    g_pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+    g_pd3dDevice->SetStreamSource(0, g_p2VB, 8);
+    g_pd3dDevice->SetIndices(g_p2IB, 0);
 
+
+
+
+    g_pd3dDevice->GetTransform(D3DTS_VIEW, &view);
+    g_pd3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
+
+
+    // compute wvp as you already do
+
+    wvp = quad_mat * view * proj;
+    // transpose for shader constant layout
+    D3DXMATRIX wvpT;
+    D3DXMatrixTranspose(&wvpT, &wvp);
+    g_pd3dDevice->SetVertexShaderConstant(0, &wvpT, 4);
+    g_pd3dDevice->SetVertexShaderConstant(4, g_Cube001_PosMin, 1);
+    g_pd3dDevice->SetVertexShaderConstant(5, g_Cube001_PosMax, 1);
+    g_pd3dDevice->SetVertexShaderConstant(6, c6, 1);
+
+
+    g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+
+    g_pd3dDevice->SetIndices(0, 0);
     g_pd3dDevice->SetTexture(0, NULL);
+
+
     // End the scene
     g_pd3dDevice->EndScene();
-    // Present the backbuffer contents to the display
     g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
-
-//static void SetupSmokeStates()
-//{
-//
-//    g_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-//
-//    g_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//    g_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-//    g_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-//
-//    g_pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-//    g_pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-//    g_pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-//
-//    g_pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-//    g_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-//    g_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-//}
-//
-//static void EndSmokeStates()
-//{
-//    g_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-//}

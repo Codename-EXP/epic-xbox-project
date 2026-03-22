@@ -65,11 +65,22 @@
     <ClInclude Include="SRC\Engine\Objects\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SRC\Engine\Constants\DislayConst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRC\Engine\Constants\ctint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRC\External\Blender\all_meshes_export.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Media\Copy Assets Here.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="SRC\External\Blender\ExportSceneToBinary.py" />
+    <None Include="SRC\External\Blender\ExportSceneToHeaders.py" />
   </ItemGroup>
 </Project>
