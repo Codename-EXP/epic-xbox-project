@@ -1,6 +1,7 @@
 #include "Graphics.h"
 
 #include "../../External/HLSL/vert1.h" 
+#include "../../External/HLSL/font.h" 
 #include "../../External/Blender/all_meshes_export.h" 
 //-----------------------------------------------------------------------------
 // Global variables
@@ -12,9 +13,109 @@ LPDIRECT3DVERTEXBUFFER8 g_p2VB = NULL; // Buffer to hold vertices
 LPDIRECT3DINDEXBUFFER8  g_pIB = NULL; // Buffer to hold indices
 LPDIRECT3DINDEXBUFFER8  g_p2IB = NULL; // Buffer to hold indices
 
+int test_font_count = 0;
+LPDIRECT3DVERTEXBUFFER8 test_font_vb = 0;
 
-// Our custom FVF, which describes our custom vertex structure
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)
+
+LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(char* string) {
+    if (!string) return 0;
+
+    char buffer[512];
+    int i = 0;
+    // i max value of 63
+
+    while (char c = string[i]) {
+
+        if (c >= 0x30) {
+            if (c < 0x40) {
+                c -= 22;
+                goto submit;
+            }
+            else if ((c & ~0x20) >= 0x41 && (c & ~0x20) < 0x5B) {
+                c -= 0x41;
+                goto submit;
+            }
+        }
+        switch (c) {
+        case 0x20: // space 
+            break;
+        case 0x21: // !
+            c = 43;
+            break;
+        case 0x22: // "
+            c = 42;
+            break;
+        case 0x28: // (
+        case 0x5b: // [
+            c = 40;
+            break;
+        case 0x29: // )
+        case 0x93: // ]
+            c = 41;
+            break;
+        case 0x2a: // *
+            c = 47;
+            break;
+        case 0x2b: // +
+            c = 45;
+            break;
+        case 0x2d: // -
+            c = 44;
+            break;
+        case 0x2c: // ,
+        case 0x2e: // .
+            c = 36;
+            break;
+        case 0x3a: // :
+            c = 38;
+            break;
+        case 0x3d: // =
+            c = 46;
+            break;
+        case 0x5f: // _
+            c = 37;
+            break;
+        default: // any unsupported characters
+            c = 39;
+            break;
+        }
+
+    submit:
+
+        // create for vertices
+        buffer[i * 8] = (char)i | 0b00'000000;
+        buffer[i * 8 + 1] = c;
+        buffer[i * 8 + 2] = (char)i | 0b01'000000;
+        buffer[i * 8 + 3] = c;
+        buffer[i * 8 + 4] = (char)i | 0b11'000000;
+        buffer[i * 8 + 5] = c;
+        buffer[i * 8 + 6] = (char)i | 0b10'000000;
+        buffer[i * 8 + 7] = c;
+
+
+
+        i += 1;
+        if (i == 64) break;
+    }
+
+
+    LPDIRECT3DVERTEXBUFFER8 result_vb = NULL;
+
+    if (FAILED(g_pd3dDevice->CreateVertexBuffer(i * 8, 0, 0, 0, &result_vb))) {
+
+    }
+
+    void* vert_buffer;
+    if (FAILED(result_vb->Lock(0, 0, (BYTE**)&vert_buffer, 0))) {
+
+    }
+    memcpy(vert_buffer, buffer, i * 8);
+    result_vb->Unlock();
+
+    test_font_count = i;
+    return result_vb;
+}
+
 
 
 static LPDIRECT3DTEXTURE8 s_smokeTex = NULL;
@@ -23,7 +124,7 @@ static void LoadSmokeTexture()
     if (s_smokeTex || !g_pd3dDevice) return;
 
     const char* p0 = "D:\\test\\grass.dds";
-    const char* p1 = "D:\\chrome_diff.dds";
+    const char* p1 = "D:\\test\\font32.dds";
 
     if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, p1, &s_smokeTex))) {
 
@@ -90,6 +191,8 @@ HRESULT InitVB()
 
     LoadSmokeTexture();
 
+    test_font_vb = ConstructStringBuffer("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*");
+
     return S_OK;
 }
 
@@ -99,6 +202,14 @@ const DWORD s_vsDecl[] =
     D3DVSD_STREAM(0),
     D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_D3DCOLOR),
     D3DVSD_REG(D3DVSDE_NORMAL,   D3DVSDT_D3DCOLOR),
+    D3DVSD_END()
+};
+
+DWORD s_vs2Handle = 0;
+const DWORD s_vsDecl2[] =
+{
+    D3DVSD_STREAM(0),
+    D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_PBYTE2),
     D3DVSD_END()
 };
 
@@ -133,6 +244,9 @@ HRESULT InitD3D()
 
     if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl, dwVert1VertexShader, &s_vsHandle, 0)))
         return E_FAIL;
+    if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl2, dwFontVertexShader, &s_vs2Handle, 0)))
+        return E_FAIL;
+
 
     // Initialize the vertex buffer
     return InitVB();
@@ -263,6 +377,34 @@ void Render()
     g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
 
     g_pd3dDevice->SetIndices(0, 0);
+
+
+    float c1[4] =
+    {
+        4.0f,   // glyph width in pixels
+        5.0f,  // glyph height in pixels
+        6.0f / 640.0f,  // screenScaleX (convert pixels → clip space)
+        6.0f / 480.0f   // screenScaleY
+    };
+    float c2[4] =
+    {
+        4.0f / 32.0f,   // tileWidthUV
+        5.0f / 32.0f,   // tileHeightUV
+        8.0f,          // tilesPerRow
+        1.0f / 8.0f    // convenience
+    };
+    g_pd3dDevice->SetVertexShader(s_vs2Handle);
+    g_pd3dDevice->SetStreamSource(0, test_font_vb, 2);
+    float c3[4] = { 0.0f, 1.0f, 64.0f, 256.0f };
+    float c4[4] = { 2.0f, 128.0f, 7.0f, 0.95f };
+    g_pd3dDevice->SetVertexShaderConstant(0, c1, 4);
+    g_pd3dDevice->SetVertexShaderConstant(1, c2, 1);
+    g_pd3dDevice->SetVertexShaderConstant(2, c3, 1);
+    g_pd3dDevice->SetVertexShaderConstant(3, c4, 1);
+    g_pd3dDevice->DrawPrimitive(D3DPT_QUADLIST, 0, test_font_count);
+
+
+
     g_pd3dDevice->SetTexture(0, NULL);
 
 
@@ -270,3 +412,4 @@ void Render()
     g_pd3dDevice->EndScene();
     g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
+
