@@ -50,7 +50,7 @@ LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(char* string) {
             c = 40;
             break;
         case 0x29: // )
-        case 0x93: // ]
+        case 0x5d: // ]
             c = 41;
             break;
         case 0x2a: // *
@@ -83,14 +83,14 @@ LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(char* string) {
     submit:
 
         // create for vertices
-        buffer[i * 8] = (char)i | 0b00'000000;
-        buffer[i * 8 + 1] = c;
-        buffer[i * 8 + 2] = (char)i | 0b01'000000;
-        buffer[i * 8 + 3] = c;
-        buffer[i * 8 + 4] = (char)i | 0b11'000000;
-        buffer[i * 8 + 5] = c;
-        buffer[i * 8 + 6] = (char)i | 0b10'000000;
-        buffer[i * 8 + 7] = c;
+        buffer[i * 8    ] = (char)i | 0b0'0000000;
+        buffer[i * 8 + 1] = c       | 0b0'0000000;
+        buffer[i * 8 + 2] = (char)i | 0b0'0000000;
+        buffer[i * 8 + 3] = c       | 0b1'0000000;
+        buffer[i * 8 + 4] = (char)i | 0b1'0000000;
+        buffer[i * 8 + 5] = c       | 0b1'0000000;
+        buffer[i * 8 + 6] = (char)i | 0b1'0000000;
+        buffer[i * 8 + 7] = c       | 0b0'0000000;
 
 
 
@@ -312,13 +312,7 @@ void Render()
     g_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
     g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -374,29 +368,40 @@ void Render()
     g_pd3dDevice->SetVertexShaderConstant(6, c6, 1);
 
 
+
     g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
 
     g_pd3dDevice->SetIndices(0, 0);
 
 
+
+
+    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
     float c1[4] =
     {
         4.0f,   // glyph width in pixels
         5.0f,  // glyph height in pixels
-        6.0f / 640.0f,  // screenScaleX (convert pixels → clip space)
-        6.0f / 480.0f   // screenScaleY
+        2.0f / 640.0f,  // screenScaleX (convert pixels → clip space)
+        2.0f / 480.0f   // screenScaleY
     };
     float c2[4] =
     {
         4.0f / 32.0f,   // tileWidthUV
         5.0f / 32.0f,   // tileHeightUV
         8.0f,          // tilesPerRow
-        1.0f / 8.0f    // convenience
+        6.0f // glyphWidthPixelsSpacer
     };
     g_pd3dDevice->SetVertexShader(s_vs2Handle);
     g_pd3dDevice->SetStreamSource(0, test_font_vb, 2);
-    float c3[4] = { 0.0f, 1.0f, 64.0f, 256.0f };
-    float c4[4] = { 2.0f, 128.0f, 7.0f, 0.95f };
+    float c3[4] = { 0.0f, 1.0f, 128.0f, 255.0f };
+    float c4[4] = { 0.1f, 1.0f, 0.0f, 1.0f };
     g_pd3dDevice->SetVertexShaderConstant(0, c1, 4);
     g_pd3dDevice->SetVertexShaderConstant(1, c2, 1);
     g_pd3dDevice->SetVertexShaderConstant(2, c3, 1);
