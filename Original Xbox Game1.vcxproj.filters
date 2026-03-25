@@ -78,6 +78,7 @@
   <ItemGroup>
     <Text Include="Media\Copy Assets Here.txt" />
     <Text Include="SRC\External\PS\pixel1.txt" />
+    <Text Include="SRC\External\HLSL\fontPS.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

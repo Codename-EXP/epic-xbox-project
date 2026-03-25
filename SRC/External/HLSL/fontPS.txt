@@ -1,0 +1,15 @@
+
+/*//
+
+## compile into header file
+C:\Users\ct770\Downloads\CODENAME_MEXP\rxdk\RXDK\xbox\bin\xsasm.exe /h "C:\Users\ct770\Downloads\CODENAME_MEXP\vs26 xbox test\Original Xbox Game1\SRC\External\HLSL\fontPS.txt"
+
+*///
+
+xps.1.1  ; Xbox pixel shader version 1.1.
+
+
+
+tex t0 
+mov r0, t0.b
+
