@@ -286,24 +286,16 @@ void Render()
     g_pd3dDevice->SetIndices(0, 0);
 
 
+    // render console log
+    {   
+        g_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+        g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 10);     // 0-255 alpha threshold
+        g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
-
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-    // we dont modulate the alpha
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-
-    g_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-    g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 10);     // threshold
-    g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-
-    g_pd3dDevice->SetVertexShader(s_vs2Handle);
-    g_pd3dDevice->SetPixelShader(s_ps2Handle);
-    Log_Render();
+        g_pd3dDevice->SetVertexShader(s_vs2Handle);
+        g_pd3dDevice->SetPixelShader(s_ps2Handle);
+        Log_Render();
+    }
 
 
 

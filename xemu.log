@@ -1,0 +1,14 @@
+Created QEMU launch parameters: C:\Users\ct770\Downloads\CODENAME_MEXP\xemu-0.8.133-windows-x86_64\xemu.exe -machine xbox,bootrom=C:\Users\ct770\Downloads\CODENAME_MEXP\xemu-0.8.133-windows-x86_64\XEMU_FILES\Boot ROM image\mcpx_1.0.bin,short-animation=on,kernel-irqchip=off,avpack=hdtv -device smbus-storage,file=C:\Users\ct770\AppData\Roaming\xemu\xemu\eeprom.bin -bios C:\Users\ct770\Downloads\CODENAME_MEXP\xemu-0.8.133-windows-x86_64\XEMU_FILES\BIOS\Complex_4627v1.03.bin -m 64 -drive index=0,media=disk,file=C:\Users\ct770\Downloads\CODENAME_MEXP\xemu-0.8.133-windows-x86_64\XEMU_FILES\Xbox HDD Image with Original Dashboard\xbox_hdd.qcow2,locked=on -drive index=1,media=cdrom,file=C:\Users\ct770\Downloads\CODENAME_MEXP\vs26 xbox test\Original Xbox Game1\Debug\XISO\Original Xbox Game1.iso -display xemu -device usb-hub,port=1,ports=4 
+xemu_version: 0.8.134
+xemu_commit: fc9980d2962cbec656253106ea2e121fab1e68d4
+xemu_date: Thu Feb 26 02:32:06 UTC 2026
+xemu_settings_get_base_path: base path: C:\Users\ct770\AppData\Roaming\xemu\xemu\
+xemu_settings_get_path: config path: C:\Users\ct770\AppData\Roaming\xemu\xemu\xemu.toml
+nvapi: Saved settings
+CPU: AMD Ryzen 9 8940HX with Radeon Graphics        
+OS_Version:  25H2
+GL_VENDOR: NVIDIA Corporation
+GL_RENDERER: NVIDIA GeForce RTX 5070 Laptop GPU/PCIe/SSE2
+GL_VERSION: 4.0.0 NVIDIA 581.57
+GL_SHADING_LANGUAGE_VERSION: 4.00 NVIDIA via Cg compiler
+GL geometry shader winding: 0, 0, 0, 0

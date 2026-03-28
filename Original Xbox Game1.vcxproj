@@ -116,8 +116,15 @@ MKDIR "$(OutDir)Build\$(ProjectName)"
 COPY /Y "$(OutDir)$(TargetName).xbe" "$(OutDir)Build\$(ProjectName)\default.xbe"
 XCOPY /I /E /S /Y /F "$(ProjectDir)Media\*" "$(OutDir)Build\$(ProjectName)"
 MKDIR "$(OutDir)XISO"
-"$(RXDK_LIBS)bin\xdvdfs.exe" pack "$(OutDir)Build\$(ProjectName)" "$(OutDir)XISO\$(ProjectName).iso"</Command>
+"$(RXDK_LIBS)bin\xdvdfs.exe" pack "$(OutDir)Build\$(ProjectName)" "$(OutDir)XISO\$(ProjectName).iso"
+
+
+start "" "C:\Users\ct770\Downloads\CODENAME_MEXP\xemu-0.8.133-windows-x86_64\xemu.exe" -dvd_path "C:\Users\ct770\Downloads\CODENAME_MEXP\vs26 xbox test\Original Xbox Game1\Debug\XISO\Original Xbox Game1.iso"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>taskkill /IM xemu.exe /F &gt;nul 2&gt;&amp;1 || exit /B 0
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
