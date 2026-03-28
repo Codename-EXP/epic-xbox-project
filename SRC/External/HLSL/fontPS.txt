@@ -11,5 +11,9 @@ xps.1.1  ; Xbox pixel shader version 1.1.
 
 
 tex t0 
-mov r0, t0.b
 
+; move texture into alpha channel
+mov r0, t0.b 
+
+; move color into RGB channel
+mov r0.rgb, v0

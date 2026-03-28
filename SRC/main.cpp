@@ -22,7 +22,7 @@ void __cdecl main()
 
     Input_Init();
     main_camera.init();
-
+    Log("Program running!!", log_green);
 
     while (TRUE)
     {

@@ -81,6 +81,6 @@ VS_OUTPUT main(VS_INPUT input)
     float2 inverted_cornerOffset = float2(cornerX, inverted_y);
     
     o.TexCoord = tileOrigin + inverted_cornerOffset * float2(tileWidthUV, tileHeightUV);
-    o.Color = text_color;
+    o.Color = text_color.xyz;
     return o;
 }

@@ -166,6 +166,7 @@ MKDIR "$(OutDir)XISO"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SRC\Engine\Logging\Log.cpp" />
     <ClCompile Include="SRC\Engine\Objects\Entity.cpp" />
     <ClCompile Include="SRC\Engine\Objects\Transform.cpp" />
     <ClCompile Include="SRC\Engine\Graphics\Graphics.cpp" />
@@ -178,6 +179,7 @@ MKDIR "$(OutDir)XISO"
   <ItemGroup>
     <ClInclude Include="SRC\Engine\Constants\ctint.h" />
     <ClInclude Include="SRC\Engine\Constants\DislayConst.h" />
+    <ClInclude Include="SRC\Engine\Logging\Log.h" />
     <ClInclude Include="SRC\Engine\Objects\Entity.h" />
     <ClInclude Include="SRC\Engine\Objects\Transform.h" />
     <ClInclude Include="SRC\Engine\Graphics\Graphics.h" />

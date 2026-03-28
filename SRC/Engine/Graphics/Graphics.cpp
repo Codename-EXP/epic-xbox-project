@@ -8,115 +8,14 @@
 // Global variables
 //-----------------------------------------------------------------------------
 LPDIRECT3D8             g_pD3D = NULL; // Used to create the D3DDevice
-LPDIRECT3DDEVICE8       g_pd3dDevice = NULL; // Our rendering device
+LPDIRECT3DDEVICE8 g_pd3dDevice = NULL;
 LPDIRECT3DVERTEXBUFFER8 g_pVB = NULL; // Buffer to hold vertices
 LPDIRECT3DVERTEXBUFFER8 g_p2VB = NULL; // Buffer to hold vertices
 LPDIRECT3DINDEXBUFFER8  g_pIB = NULL; // Buffer to hold indices
 LPDIRECT3DINDEXBUFFER8  g_p2IB = NULL; // Buffer to hold indices
 
-int test_font_count = 0;
-LPDIRECT3DVERTEXBUFFER8 test_font_vb = 0;
-
-
-LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(char* string) {
-    if (!string) return 0;
-
-    char buffer[512];
-    int string_index = 0;
-    int buffer_index = 0;
-    // i max value of 63
-
-    while (char c = string[string_index]) {
-
-        if (c >= 0x30) {
-            if (c < 0x40) {
-                c -= 22;
-                goto submit;
-            }
-            else if ((c & ~(char)0x20) >= 0x41 && (c & ~(char)0x20) < 0x5B) {
-                c -= 0x41;
-                goto submit;
-            }
-        }
-        switch (c) {
-        case 0x20: // space 
-            goto skip;
-        case 0x21: // !
-            c = 43;
-            break;
-        case 0x22: // "
-            c = 42;
-            break;
-        case 0x28: // (
-        case 0x5b: // [
-            c = 40;
-            break;
-        case 0x29: // )
-        case 0x5d: // ]
-            c = 41;
-            break;
-        case 0x2a: // *
-            c = 47;
-            break;
-        case 0x2b: // +
-            c = 45;
-            break;
-        case 0x2d: // -
-            c = 44;
-            break;
-        case 0x2c: // ,
-        case 0x2e: // .
-            c = 36;
-            break;
-        case 0x3a: // :
-            c = 38;
-            break;
-        case 0x3d: // =
-            c = 46;
-            break;
-        case 0x5f: // _
-            c = 37;
-            break;
-        default: // any unsupported characters
-            c = 39;
-            break;
-        }
-
-    submit:
-
-        // create for vertices
-        buffer[buffer_index    ] = (char)string_index   | 0b0'0000000;
-        buffer[buffer_index + 1] = c                    | 0b0'0000000;
-        buffer[buffer_index + 2] = (char)string_index   | 0b0'0000000;
-        buffer[buffer_index + 3] = c                    | 0b1'0000000;
-        buffer[buffer_index + 4] = (char)string_index   | 0b1'0000000;
-        buffer[buffer_index + 5] = c                    | 0b1'0000000;
-        buffer[buffer_index + 6] = (char)string_index   | 0b1'0000000;
-        buffer[buffer_index + 7] = c                    | 0b0'0000000;
-
-
-        buffer_index += 8;
-    skip:
-        string_index += 1;
-        if (buffer_index == 512 || string_index == 128) break;
-    }
-
-
-    LPDIRECT3DVERTEXBUFFER8 result_vb = NULL;
-
-    if (FAILED(g_pd3dDevice->CreateVertexBuffer(buffer_index, 0, 0, 0, &result_vb))) {
-
-    }
-
-    void* vert_buffer;
-    if (FAILED(result_vb->Lock(0, 0, (BYTE**)&vert_buffer, 0))) {
-
-    }
-    memcpy(vert_buffer, buffer, buffer_index);
-    result_vb->Unlock();
-
-    test_font_count = buffer_index / 8;
-    return result_vb;
+LPDIRECT3DDEVICE8 Graphics_GetD3D() {
+    return g_pd3dDevice;
 }
 
 
@@ -194,7 +93,8 @@ HRESULT InitVB()
 
     LoadSmokeTexture();
 
-    test_font_vb = ConstructStringBuffer("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*");
+    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_red); // _:@[]=
+    Log("broken chars _:@[]=", log_green); // 
     //test_font_vb = ConstructStringBuffer("HELLO WORLD !! 12345");
 
     return S_OK;
@@ -384,11 +284,12 @@ void Render()
 
 
 
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    // we dont modulate the alpha
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
     //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
     //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
@@ -396,32 +297,9 @@ void Render()
     g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 128);     // threshold
     g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
-
     g_pd3dDevice->SetVertexShader(s_vs2Handle);
     g_pd3dDevice->SetPixelShader(s_ps2Handle);
-    g_pd3dDevice->SetStreamSource(0, test_font_vb, 2);
-
-    float c0[4] = { 4.0f, 5.0f, 4.0f / 32.0f, 5.0f / 32.0f };
-    float c1[4] = { 8.0f, 1.0f, 128.0f, 255.0f };
-
-    // adjustable text display params
-    float c2[4] = {
-        0.0f, // must be zero
-        2.0f / 640.0f, // screenScaleX
-        2.0f / 480.0f, // screenScaleY
-        6.0f, // glyphWidthPixelsSpacer
-    };
-    float c3[4] = {
-        0.1f, // Red
-        1.0f, // Green
-        0.0f, // Blue
-        10.0f // Y Offset
-    };
-    g_pd3dDevice->SetVertexShaderConstant(0, c0, 4);
-    g_pd3dDevice->SetVertexShaderConstant(1, c1, 1);
-    g_pd3dDevice->SetVertexShaderConstant(2, c2, 1);
-    g_pd3dDevice->SetVertexShaderConstant(3, c3, 1);
-    g_pd3dDevice->DrawPrimitive(D3DPT_QUADLIST, 0, test_font_count);
+    Log_Render();
 
 
 

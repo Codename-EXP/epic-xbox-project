@@ -42,6 +42,9 @@
     <ClCompile Include="SRC\Engine\Objects\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Engine\Logging\Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SRC\Engine\Input\input.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SRC\External\Blender\all_meshes_export.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRC\Engine\Logging\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
