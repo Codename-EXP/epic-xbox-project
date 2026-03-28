@@ -12,100 +12,153 @@ log_entry logs[max_logs];
 UINT active_log_count = 0;
 
 
-LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(const char* string, UINT* output_vertex_count) {
+LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(const char* string, UINT* output_vertex_count, bool display_extra_as_int, void* extra_to_display) {
     if (!string) return 0;
 
     char buffer[512];
+    UINT output_char_index = 0; 
     UINT string_index = 0; // breaks at null terminator
     UINT buffer_index = 0; // auto breaks at index 512
 
-    while (char c = string[string_index]) {
+    bool has_interpretted_extra = false;
+    bool is_processing_int = false;
 
-        // check if character falls under alphanumeric patterns
-        if (c >= 0x30) {
-            // push number sequences into glyph indexes
-            if (c < 0x3A) {
-                c -= 22;
-                goto submit;
+    while (true) {
+        char c;
+        if (!is_processing_int) {
+
+            c = string[string_index];
+            string_index += 1;
+            // end of string
+            if (!c) {
+                // break if we reach end of string after processing second strng
+                if (has_interpretted_extra) break;
+                has_interpretted_extra = true;
+                // if we set append mode, load the extra content as a str pointer
+                if (!display_extra_as_int) {
+                    // if no additional string provided, skip
+                    if (!extra_to_display) break;
+
+                    // load space bar as joining letter
+                    string_index = 0;
+                    string = (const char*)extra_to_display;
+                    if (!*string) break;
+                    c = ' ';
+                }
+                else {
+                    string_index = 28;
+                    is_processing_int = true;
+                    continue;
+                }
+
             }
-            // case insensitive check for alphabet
-            else {
-                char lower_case = c & ~(char)0x20;
-                if (lower_case >= 0x41 && lower_case < 0x5B) {
-                    c = lower_case - 0x41;
+
+            // check if character falls under alphanumeric patterns
+            if (c >= 0x30) {
+                // push number sequences into glyph indexes
+                if (c < 0x3A) {
+                    c -= 22;
                     goto submit;
                 }
-            }
+                // case insensitive check for alphabet
+                else {
+                    char lower_case = c & ~(char)0x20;
+                    if (lower_case >= 0x41 && lower_case < 0x5B) {
+                        c = lower_case - 0x41;
+                        goto submit;
+                    }
+                }
                 
-              // broken chars: _:@[]=
-            // 0x3a : 
-            // 0x3d =
-            // 0x5f _ 
-            // UNK  @ 
-            // 0x5b [
-            // 0x5d ]
+                  // broken chars: _:@[]=
+                // 0x3a : 
+                // 0x3d =
+                // 0x5f _ 
+                // UNK  @ 
+                // 0x5b [
+                // 0x5d ]
+            }
+            // otherwise do a switch to convert char index in place
+            switch (c) {
+                case 0x20: // space 
+                    goto skip;
+                case 0x21: // !
+                    c = 43;
+                    break;
+                case 0x22: // "
+                    c = 42;
+                    break;
+                case 0x28: // (
+                case 0x5b: // [
+                    c = 40;
+                    break;
+                case 0x29: // )
+                case 0x5d: // ]
+                    c = 41;
+                    break;
+                case 0x2a: // *
+                    c = 47;
+                    break;
+                case 0x2b: // +
+                    c = 45;
+                    break;
+                case 0x2d: // -
+                    c = 44;
+                    break;
+                case 0x2c: // ,
+                case 0x2e: // .
+                    c = 36;
+                    break;
+                case 0x3a: // :
+                    c = 38;
+                    break;
+                case 0x3d: // =
+                    c = 46;
+                    break;
+                case 0x5f: // _
+                    c = 37;
+                    break;
+                default: // any unsupported characters
+                    c = 39;
+                    break;
+            }
         }
-        // otherwise do a switch to convert char index in place
-        switch (c) {
-            case 0x20: // space 
-                goto skip;
-            case 0x21: // !
-                c = 43;
-                break;
-            case 0x22: // "
-                c = 42;
-                break;
-            case 0x28: // (
-            case 0x5b: // [
-                c = 40;
-                break;
-            case 0x29: // )
-            case 0x5d: // ]
-                c = 41;
-                break;
-            case 0x2a: // *
-                c = 47;
-                break;
-            case 0x2b: // +
-                c = 45;
-                break;
-            case 0x2d: // -
-                c = 44;
-                break;
-            case 0x2c: // ,
-            case 0x2e: // .
-                c = 36;
-                break;
-            case 0x3a: // :
-                c = 38;
-                break;
-            case 0x3d: // =
-                c = 46;
-                break;
-            case 0x5f: // _
-                c = 37;
-                break;
-            default: // any unsupported characters
-                c = 39;
-                break;
+        // process integer
+        else {
+            if (string_index == -4) break;
+            // take 4 highest bits 
+             UINT val = (UINT)extra_to_display;
+             val >>= string_index;
+             val &= 15;
+
+             // if numeric, then bump up to glyph index 26
+             if (val < 10) {
+                 val += 26;
+             }
+             // else convert into alphabetic glyph, ABCDEF -> 012345
+             else {
+                 val -= 10;
+             }
+             c = val;
+
+             string_index -= 4;
         }
 
     submit:
         // create for vertices
-        buffer[buffer_index]     = (char)string_index+1 | 0b0'0000000;
+        buffer[buffer_index]     = (char)output_char_index +1 | 0b0'0000000;
         buffer[buffer_index + 1] = c | 0b0'0000000;
-        buffer[buffer_index + 2] = (char)string_index+1 | 0b0'0000000;
+        buffer[buffer_index + 2] = (char)output_char_index +1 | 0b0'0000000;
         buffer[buffer_index + 3] = c | 0b1'0000000;
-        buffer[buffer_index + 4] = (char)string_index+1 | 0b1'0000000;
+        buffer[buffer_index + 4] = (char)output_char_index +1 | 0b1'0000000;
         buffer[buffer_index + 5] = c | 0b1'0000000;
-        buffer[buffer_index + 6] = (char)string_index+1 | 0b1'0000000;
+        buffer[buffer_index + 6] = (char)output_char_index +1 | 0b1'0000000;
         buffer[buffer_index + 7] = c | 0b0'0000000;
 
 
         buffer_index += 8;
     skip:
-        string_index += 1;
-        if (buffer_index == 512 || string_index == 128) break;
+        output_char_index += 1;
+        if (buffer_index == 512 || output_char_index == 128) break;
     }
 
 
@@ -126,7 +179,9 @@ LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(const char* string, UINT* output_v
     return result_vb;
 }
 
-void Log(const char* string, const float* color) {
+void Log(const char* string, const float* color, bool display_extra_as_int, void* extra_to_display) {
+    if (!Graphics_GetD3D()) return; // no logs if we arent init
+
     // release oldest log if buffer is full, as it'll be overwritten
     if (active_log_count >= max_logs) {
         logs[15].vertex_buffer_handle->Release();
@@ -143,7 +198,7 @@ void Log(const char* string, const float* color) {
     }
 
     // convert string to vertex buffer and write to submit to log
-    logs[0].vertex_buffer_handle = ConstructStringBuffer(string, &logs[0].vertex_count);
+    logs[0].vertex_buffer_handle = ConstructStringBuffer(string, &logs[0].vertex_count, display_extra_as_int, extra_to_display);
     memcpy(logs[0].color, color, 12);
 
     if (active_log_count < max_logs) active_log_count += 1;

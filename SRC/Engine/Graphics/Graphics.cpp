@@ -93,9 +93,10 @@ HRESULT InitVB()
 
     LoadSmokeTexture();
 
-    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_red); // _:@[]=
-    Log("broken chars _:@[]=", log_green); // 
-    //test_font_vb = ConstructStringBuffer("HELLO WORLD !! 12345");
+    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_white); // _:@[]=
+    Log("HELLO WORLD !! 12345: ", log_green, true, (void*)12345678); // BC614E
+    Log("epic funny test: ", log_green, true, (void*)0x34128967);
+    Log("string join test", log_green, false, "2nd half");
 
     return S_OK;
 }
