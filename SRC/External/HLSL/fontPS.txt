@@ -16,4 +16,4 @@ tex t0
 mov r0, t0.b 
 
 ; move color into RGB channel
-mov r0.rgb, v0
+mul r0.rgb, t0, v0

@@ -26,7 +26,7 @@ static void LoadSmokeTexture()
     if (s_smokeTex || !g_pd3dDevice) return;
 
     const char* p0 = "D:\\test\\grass.dds";
-    const char* p1 = "D:\\test\\font32.dds";
+    const char* p1 = "D:\\test\\font32_64.dds";
 
     if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, p1, &s_smokeTex))) {
 
@@ -93,9 +93,12 @@ HRESULT InitVB()
 
     LoadSmokeTexture();
 
-    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_white); // _:@[]=
+    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_white); 
     Log("HELLO WORLD !! 12345: ", log_green, true, (void*)12345678); // BC614E
     Log("epic funny test: ", log_green, true, (void*)0x34128967);
+    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ._:@[]\"!-+=*", log_white);
+    Log("epicfunnytest._:@[]\"!-+=*", log_red);
+    Log("ABC0123456789._:@[]\"!-+=*", log_red);
     Log("string join test", log_green, false, "2nd half");
 
     return S_OK;
@@ -295,7 +298,7 @@ void Render()
     //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
     g_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-    g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 128);     // threshold
+    g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 10);     // threshold
     g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
     g_pd3dDevice->SetVertexShader(s_vs2Handle);

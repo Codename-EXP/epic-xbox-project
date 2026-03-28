@@ -95,9 +95,6 @@ LPDIRECT3DVERTEXBUFFER8 ConstructStringBuffer(const char* string, UINT* output_v
                 case 0x5d: // ]
                     c = 41;
                     break;
-                case 0x2a: // *
-                    c = 47;
-                    break;
                 case 0x2b: // +
                     c = 45;
                     break;
@@ -210,8 +207,9 @@ void Log_Render() {
     auto d3d = Graphics_GetD3D();
 
     // apply global constants
-    float c0[4] = { 4.0f, 5.0f, 4.0f / 32.0f, 5.0f / 32.0f };
-    float c1[4] = { 8.0f, 1.0f, 128.0f, 255.0f };
+    //float c0[4] = { 4.0f, 5.0f, 4.0f / 32.0f, 5.0f / 32.0f };
+    float c0[4] = { 5.0f, 6.0f, 5.0f / 32.0f, 6.0f / 64.0f };
+    float c1[4] = { 6.0f, 1.0f, 128.0f, 255.0f };
     float c2[4] = {
         0.0f, // must be zero
         2.0f / 640.0f, // screenScaleX
