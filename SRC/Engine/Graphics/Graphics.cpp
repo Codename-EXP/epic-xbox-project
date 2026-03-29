@@ -1,8 +1,14 @@
 #include "Graphics.h"
 
-#include "../../External/HLSL/vert1.h" 
 #include "../../External/HLSL/font.h" 
 #include "../../External/HLSL/fontPS.h" 
+
+#include "../../External/HLSL/vert1.h" 
+#include "../../External/HLSL/vert1PS.h" 
+
+#include "../../External/HLSL/gizmoVS.h" 
+#include "../../External/HLSL/gizmoPS.h" 
+
 #include "../../External/Blender/all_meshes_export.h" 
 //-----------------------------------------------------------------------------
 // Global variables
@@ -21,21 +27,21 @@ LPDIRECT3DDEVICE8 Graphics_GetD3D() {
 
 
 static LPDIRECT3DTEXTURE8 s_smokeTex = NULL;
+static LPDIRECT3DTEXTURE8 s_smoke1Tex = NULL;
+static LPDIRECT3DTEXTURE8 s_smoke2Tex = NULL;
 static void LoadSmokeTexture()
 {
     if (s_smokeTex || !g_pd3dDevice) return;
 
-    const char* p0 = "D:\\test\\grass.dds";
-    const char* p1 = "D:\\test\\font32_64.dds";
 
-    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, p1, &s_smokeTex))) {
-
-        if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, p0, &s_smokeTex))) {
-
-            for (;;) {
-                p0++;
-            }
-        }
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\font32_64.dds", &s_smokeTex))) {
+        Log("failed to load font texture", log_red);
+    }
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\grass.dds", &s_smoke1Tex))) {
+        Log("failed to load grass diffuse texture", log_red);
+    }
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\norm.dds", &s_smoke2Tex))) {
+        Log("failed to load grass normal texture", log_red);
     }
 }
 
@@ -103,8 +109,11 @@ HRESULT InitVB()
 
     return S_OK;
 }
+DWORD gizmo_vsHandle = 0;
+DWORD gizmo_psHandle = 0;
 
 DWORD s_vsHandle = 0;
+DWORD s_psHandle = 0;
 const DWORD s_vsDecl[] =
 {
     D3DVSD_STREAM(0),
@@ -151,9 +160,17 @@ HRESULT InitD3D()
         return E_FAIL;
 
 
+    if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl, dwGizmoVSVertexShader, &gizmo_vsHandle, 0)))
+        return E_FAIL;
     if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl, dwVert1VertexShader, &s_vsHandle, 0)))
         return E_FAIL;
     if (FAILED(g_pd3dDevice->CreateVertexShader(s_vsDecl2, dwFontVertexShader, &s_vs2Handle, 0)))
+        return E_FAIL;
+
+    if ((g_pd3dDevice->CreatePixelShader((D3DPIXELSHADERDEF*)&dwGizmoPSPixelShader, &gizmo_psHandle)))
+        return E_FAIL;
+
+    if ((g_pd3dDevice->CreatePixelShader((D3DPIXELSHADERDEF*)&dwVert1psPixelShader, &s_psHandle)))
         return E_FAIL;
 
     if ((g_pd3dDevice->CreatePixelShader((D3DPIXELSHADERDEF*)&dwFontPSPixelShader, &s_ps2Handle)))
@@ -196,7 +213,7 @@ void SetViewFromCamera(camera& cam)
 // Name: Render()
 // Desc: Draws the scene
 //-----------------------------------------------------------------------------
-void Render()
+void Render(camera& main_camera)
 {
     // Clear the backbuffer to a blue color
     g_pd3dDevice->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,
@@ -215,9 +232,11 @@ void Render()
 
     // Set FVF and stream source
     g_pd3dDevice->SetVertexShader(s_vsHandle);
+    g_pd3dDevice->SetPixelShader(s_psHandle);
     //g_pd3dDevice->SetStreamSource(0, g_pVB, 8);
     //g_pd3dDevice->SetIndices(g_pIB, 0);
-    g_pd3dDevice->SetTexture(0, s_smokeTex);
+    g_pd3dDevice->SetTexture(0, s_smoke2Tex);
+    g_pd3dDevice->SetTexture(1, s_smoke1Tex);
 
     g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
     g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -226,19 +245,21 @@ void Render()
 
 
 
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-    g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    //
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    //g_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 
     // disable subsequent stages
-    g_pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-    g_pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    //g_pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    //g_pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
     // Ensure simple lighting settings
     g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
     g_pd3dDevice->SetRenderState(D3DRS_AMBIENT, 0x00FFFFFF);
+    g_pd3dDevice->SetRenderState(D3DRS_SPECULARENABLE, TRUE);
+
 
     D3DXMATRIX world, view, proj, wvp;
     //g_pd3dDevice->GetTransform(D3DTS_WORLD, &world);
@@ -246,7 +267,6 @@ void Render()
     //g_pd3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
     //wvp = world * view * proj;
     //g_pd3dDevice->SetVertexShaderConstant(0, &wvp, 4);
-    float c6[4] = { 1.0f, 2.0f, 0.0f, 0.0f };
     //g_pd3dDevice->SetVertexShaderConstant(4, g_Cube_PosMin, 1);
     //g_pd3dDevice->SetVertexShaderConstant(5, g_Cube_PosMax, 1);
     //g_pd3dDevice->SetVertexShaderConstant(6, c6, 1);
@@ -270,24 +290,87 @@ void Render()
 
     // compute wvp as you already do
 
-    wvp = quad_mat * view * proj;
+    wvp = view * proj;
     // transpose for shader constant layout
     D3DXMATRIX wvpT;
-    D3DXMatrixTranspose(&wvpT, &wvp);
-    g_pd3dDevice->SetVertexShaderConstant(0, &wvpT, 4);
-    g_pd3dDevice->SetVertexShaderConstant(4, g_Cube001_PosMin, 1);
-    g_pd3dDevice->SetVertexShaderConstant(5, g_Cube001_PosMax, 1);
-    g_pd3dDevice->SetVertexShaderConstant(6, c6, 1);
+    D3DXMatrixTranspose(&wvpT, &quad_mat);
 
+    D3DXMATRIX wvpT2;
+    D3DXMatrixTranspose(&wvpT2, &wvp);
+
+    float c12[4] = { 0.0f, 1.0f, 2.0f, 0.999f,};
+    float c9[4] = { main_camera.transform.pos.x, main_camera.transform.pos.y, main_camera.transform.pos.z, 1.0f }; // camera
+    
+
+
+    static float light_angle = 0.0f;
+
+    // Speed of rotation
+    light_angle += 0.01f;
+
+    // Radius of the circle
+    float radius = 4.0f;
+
+    // Compute circular motion
+    float lx = cosf(light_angle) * radius;
+    float lz = sinf(light_angle) * radius;
+
+    // Height of the light
+    float ly = 0.5f;
+
+    // Pack into your constant
+    float c8[4] = { lx,ly,lz, 0.0f };
+
+
+    g_pd3dDevice->SetVertexShaderConstant(0, &wvpT, 4);
+    g_pd3dDevice->SetVertexShaderConstant(4, &wvpT2, 4);
+    g_pd3dDevice->SetVertexShaderConstant(8, c8, 1);
+    g_pd3dDevice->SetVertexShaderConstant(9, c9, 1);
+    g_pd3dDevice->SetVertexShaderConstant(10, g_Cube001_PosMin, 1);
+    g_pd3dDevice->SetVertexShaderConstant(11, g_Cube001_PosMax, 1);
+    g_pd3dDevice->SetVertexShaderConstant(12, c12, 1);
+
+    float ps_c0[4] = { 0.6f, 0.6f, 0.6f, 1.0f, };
+    float ps_c1[4] = { 0.1f, 0.1f, 0.1f, 1.0f, };
+    g_pd3dDevice->SetPixelShaderConstant(0, ps_c0, 1);
+    g_pd3dDevice->SetPixelShaderConstant(1, ps_c1, 1);
 
 
     g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
 
-    g_pd3dDevice->SetIndices(0, 0);
+
+
+
+    // draw light gizmo
+    {
+        g_pd3dDevice->SetVertexShader(gizmo_vsHandle);
+        g_pd3dDevice->SetPixelShader(gizmo_psHandle);
+
+        D3DXMATRIX gizmo_mat;
+        D3DXMatrixTranslation(&gizmo_mat, lx, ly, lz);
+        //D3DXMatrixIdentity(&gizmo_mat);
+        g_pd3dDevice->SetTransform(D3DTS_WORLD, &gizmo_mat);
+        g_pd3dDevice->SetStreamSource(0, g_pVB, 8);
+        g_pd3dDevice->SetIndices(g_pIB, 0);
+
+        wvp = gizmo_mat * view * proj;
+        D3DXMATRIX wvpT3;
+        D3DXMatrixTranspose(&wvpT3, &wvp);
+
+        float gizmo_c6[4] = { 1.0f, 2.0f, 0,0};
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &wvpT3, 4);
+        g_pd3dDevice->SetVertexShaderConstant(4, g_Cube_PosMin, 1);
+        g_pd3dDevice->SetVertexShaderConstant(5, g_Cube_PosMax, 1);
+        g_pd3dDevice->SetVertexShaderConstant(6, gizmo_c6, 1);
+
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube_IndexCount / 3);
+    }
 
 
     // render console log
-    {   
+    {
+        g_pd3dDevice->SetTexture(0, s_smokeTex);
         g_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
         g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 10);     // 0-255 alpha threshold
         g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);

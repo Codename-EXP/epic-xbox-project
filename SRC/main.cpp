@@ -31,7 +31,7 @@ void __cdecl main()
         MoveCamera(main_camera);
         SetViewFromCamera(main_camera);
         // Render the scene
-        Render();
+        Render(main_camera);
 
     }
     //int c = connect(1,NULL,3);

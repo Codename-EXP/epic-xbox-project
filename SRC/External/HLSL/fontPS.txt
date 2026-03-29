@@ -6,7 +6,7 @@ C:\Users\ct770\Downloads\CODENAME_MEXP\rxdk\RXDK\xbox\bin\xsasm.exe /h "C:\Users
 
 *///
 
-xps.1.1  ; Xbox pixel shader version 1.1.
+xps.1.1  ; Xbox pixel shader version 1.1
 
 
 

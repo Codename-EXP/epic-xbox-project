@@ -1,0 +1,55 @@
+/*//
+
+## compile into header file
+C:\Users\ct770\Downloads\CODENAME_MEXP\rxdk\RXDK\xbox\bin\xsasm.exe /h "C:\Users\ct770\Downloads\CODENAME_MEXP\vs26 xbox test\Original Xbox Game1\SRC\External\HLSL\vert1ps.txt"
+
+*///
+xps.1.1  ; Xbox pixel shader version 1.1
+
+
+
+#define NORMAL t0
+#define NORMAL_bx2 t0_bx2
+#define DIFFUSE t1
+
+#define light_ts v0
+#define light_ts_bx2 v0_bx2
+#define view_ts v1
+
+#define CB_LIGHT_COLOR c0
+#define CB_AMBIENT_COLOR c1
+
+mov r0, v0
+xfc zero, zero, r0_sat, zero, zero, zero, r0.a
+
+
+;   ;float3 n = tex2D(sNormal, IN.uv).xyz;
+;   ;n = normalize(n * 2.0f - 1.0f);
+;       tex NORMAL ; use _bx2 to convert from [0,1] to [-1,1]
+;   
+;   ;float3 albedo = tex2D(DIFFUSE, IN.uv).rgb;
+;       tex DIFFUSE
+;   
+;   ;float3 L = normalize(IN.lightTS);
+;   ;float ndotl = saturate(dot(n, L));
+;       dp3 r0, NORMAL_bx2, light_ts_bx2
+;       xfc zero, zero, r0_sat, zero, zero, zero, r0.a
+
+;   ;float3 diffuse  = albedo * CB_LIGHT_COLOR * ndotl;
+;       mul r0, DIFFUSE, r0_sat
+;       mul r0, r0, CB_LIGHT_COLOR
+;   
+;   ;float3 color = CB_AMBIENT_COLOR * albedo + DIFFUSE; // + specular;
+;       mul DIFFUSE, DIFFUSE, CB_AMBIENT_COLOR
+;       add r0, DIFFUSE, r0
+    
+
+    
+;float  uSpecPower;
+;float  uSpecIntensity;
+
+                ;float3 V = normalize(IN.viewTS);
+                ;float3 H = normalize(L + V);
+                ;float ndoth = saturate(dot(n, H));
+                ;float3 specular = CB_LIGHT_COLOR * pow(ndoth, uSpecPower) * uSpecIntensity;
+                ; NOTE: not possible
