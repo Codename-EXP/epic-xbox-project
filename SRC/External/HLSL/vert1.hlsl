@@ -61,7 +61,7 @@ VS_OUTPUT main(VS_INPUT IN)
     T = normalize(T);
     
     // Orthogonalize tangent (Gram–Schmidt)
-    T = normalize(T - N * dot(N, T));
+    //T = normalize(T - N * dot(N, T));
     
     //float3 B = normalize(cross(T, N));
     float handedness = IN.TanPack.w * two - one;

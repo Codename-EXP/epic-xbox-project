@@ -117,9 +117,9 @@ DWORD s_psHandle = 0;
 const DWORD s_vsDecl[] =
 {
     D3DVSD_STREAM(0),
-    D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_D3DCOLOR),
-    D3DVSD_REG(D3DVSDE_NORMAL,   D3DVSDT_D3DCOLOR),
-    D3DVSD_REG(D3DVSDE_DIFFUSE,   D3DVSDT_D3DCOLOR),
+    D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_PBYTE4),
+    D3DVSD_REG(D3DVSDE_NORMAL,   D3DVSDT_PBYTE4),
+    D3DVSD_REG(D3DVSDE_DIFFUSE,   D3DVSDT_PBYTE4),
     D3DVSD_END()
 };
 
@@ -309,11 +309,11 @@ void Render(camera& main_camera)
     static float light_angle = 0.0f;
     //light_angle += 0.00f;
     light_angle += 0.01f;
-    float radius = 4.0f;
+    float radius = 2.0f;
     float lx = cosf(light_angle) * radius;
     float lz = sinf(light_angle) * radius;
-    float ly = 0.5f;
-    float c8[4] = { ly,lx,lz, 0.0f };
+    float ly = 0.5f;  
+    float c8[4] = { lx,ly,lz, 0.0f };
 
     g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
     g_pd3dDevice->SetVertexShaderConstant(4, &wvp, 4);
