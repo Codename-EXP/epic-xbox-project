@@ -200,15 +200,13 @@ MKDIR "$(OutDir)XISO"
     <Text Include="Media\Copy Assets Here.txt" />
     <Text Include="SRC\External\HLSL\fontPS.txt" />
     <Text Include="SRC\External\HLSL\gizmoPS.txt" />
+    <Text Include="SRC\External\HLSL\vert1ps.txt" />
     <Text Include="SRC\External\PS\pixel1.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="SRC\External\Blender\ExportSceneToBinary.py" />
     <None Include="SRC\External\Blender\ExportSceneToHeaders.py" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="SRC\External\HLSL\gizmoVS.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

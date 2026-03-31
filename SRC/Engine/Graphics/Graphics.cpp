@@ -119,6 +119,7 @@ const DWORD s_vsDecl[] =
     D3DVSD_STREAM(0),
     D3DVSD_REG(D3DVSDE_POSITION,  D3DVSDT_D3DCOLOR),
     D3DVSD_REG(D3DVSDE_NORMAL,   D3DVSDT_D3DCOLOR),
+    D3DVSD_REG(D3DVSDE_DIFFUSE,   D3DVSDT_D3DCOLOR),
     D3DVSD_END()
 };
 
@@ -261,7 +262,6 @@ void Render(camera& main_camera)
     g_pd3dDevice->SetRenderState(D3DRS_SPECULARENABLE, TRUE);
 
 
-    D3DXMATRIX world, view, proj, wvp;
     //g_pd3dDevice->GetTransform(D3DTS_WORLD, &world);
     //g_pd3dDevice->GetTransform(D3DTS_VIEW, &view);
     //g_pd3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
@@ -276,14 +276,23 @@ void Render(camera& main_camera)
     //g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,0, 0, g_Cube_IndexCount);
 
     D3DXMATRIX quad_mat;
-    D3DXMatrixIdentity(&quad_mat);
+    static float quad_uppies = 0.0f;
+
+    //quad_uppies += 0.01f;
+    quad_uppies += 0.00f;
+
+
+    //D3DXMatrixTranslation(&quad_mat, 0.0f, quad_uppies, 0.0f);
+    D3DXMatrixRotationYawPitchRoll(&quad_mat, 0, quad_uppies, 0);
+    //D3DXMatrixIdentity(&quad_mat);
     g_pd3dDevice->SetTransform(D3DTS_WORLD, &quad_mat);
-    g_pd3dDevice->SetStreamSource(0, g_p2VB, 8);
+    g_pd3dDevice->SetStreamSource(0, g_p2VB, 12);
     g_pd3dDevice->SetIndices(g_p2IB, 0);
 
 
 
 
+    D3DXMATRIX world, view, proj, wvp;
     g_pd3dDevice->GetTransform(D3DTS_VIEW, &view);
     g_pd3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
 
@@ -291,39 +300,23 @@ void Render(camera& main_camera)
     // compute wvp as you already do
 
     wvp = view * proj;
-    // transpose for shader constant layout
-    D3DXMATRIX wvpT;
-    D3DXMatrixTranspose(&wvpT, &quad_mat);
 
-    D3DXMATRIX wvpT2;
-    D3DXMatrixTranspose(&wvpT2, &wvp);
-
-    float c12[4] = { 0.0f, 1.0f, 2.0f, 0.999f,};
+    float c12[4] = { 0.0f, 1.0f, 2.0f, 0.5f,};
     float c9[4] = { main_camera.transform.pos.x, main_camera.transform.pos.y, main_camera.transform.pos.z, 1.0f }; // camera
+
+
     
-
-
     static float light_angle = 0.0f;
-
-    // Speed of rotation
+    //light_angle += 0.00f;
     light_angle += 0.01f;
-
-    // Radius of the circle
     float radius = 4.0f;
-
-    // Compute circular motion
     float lx = cosf(light_angle) * radius;
     float lz = sinf(light_angle) * radius;
-
-    // Height of the light
     float ly = 0.5f;
+    float c8[4] = { ly,lx,lz, 0.0f };
 
-    // Pack into your constant
-    float c8[4] = { lx,ly,lz, 0.0f };
-
-
-    g_pd3dDevice->SetVertexShaderConstant(0, &wvpT, 4);
-    g_pd3dDevice->SetVertexShaderConstant(4, &wvpT2, 4);
+    g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+    g_pd3dDevice->SetVertexShaderConstant(4, &wvp, 4);
     g_pd3dDevice->SetVertexShaderConstant(8, c8, 1);
     g_pd3dDevice->SetVertexShaderConstant(9, c9, 1);
     g_pd3dDevice->SetVertexShaderConstant(10, g_Cube001_PosMin, 1);
@@ -341,6 +334,8 @@ void Render(camera& main_camera)
 
 
 
+
+
     // draw light gizmo
     {
         g_pd3dDevice->SetVertexShader(gizmo_vsHandle);
@@ -350,10 +345,10 @@ void Render(camera& main_camera)
         D3DXMatrixTranslation(&gizmo_mat, lx, ly, lz);
         //D3DXMatrixIdentity(&gizmo_mat);
         g_pd3dDevice->SetTransform(D3DTS_WORLD, &gizmo_mat);
-        g_pd3dDevice->SetStreamSource(0, g_pVB, 8);
+        g_pd3dDevice->SetStreamSource(0, g_pVB, 12);
         g_pd3dDevice->SetIndices(g_pIB, 0);
 
-        wvp = gizmo_mat * view * proj;
+        D3DXMATRIX wvp = gizmo_mat * view * proj;
         D3DXMATRIX wvpT3;
         D3DXMatrixTranspose(&wvpT3, &wvp);
 

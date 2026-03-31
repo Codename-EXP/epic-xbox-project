@@ -19,21 +19,21 @@ xps.1.1  ; Xbox pixel shader version 1.1
 #define CB_LIGHT_COLOR c0
 #define CB_AMBIENT_COLOR c1
 
-mov r0, v0
-xfc zero, zero, r0_sat, zero, zero, zero, r0.a
+;mov r0, v0
+;xfc zero, zero, r0_sat, zero, zero, zero, r0.a
 
 
-;   ;float3 n = tex2D(sNormal, IN.uv).xyz;
-;   ;n = normalize(n * 2.0f - 1.0f);
-;       tex NORMAL ; use _bx2 to convert from [0,1] to [-1,1]
-;   
-;   ;float3 albedo = tex2D(DIFFUSE, IN.uv).rgb;
-;       tex DIFFUSE
-;   
-;   ;float3 L = normalize(IN.lightTS);
-;   ;float ndotl = saturate(dot(n, L));
-;       dp3 r0, NORMAL_bx2, light_ts_bx2
-;       xfc zero, zero, r0_sat, zero, zero, zero, r0.a
+  ;float3 NORMAL = tex2D(sNormal, IN.uv).xyz;
+  ;NORMAL = normalize(NORMAL * 2.0f - 1.0f);
+      tex NORMAL ; use _bx2 to convert from [0,1] to [-1,1]
+  
+  ;float3 albedo = tex2D(DIFFUSE, IN.uv).rgb;
+      tex DIFFUSE
+  
+  ;float3 L = normalize(IN.light_ts);
+  ;float ndotl = saturate(dot(n, L));
+      dp3 r0, NORMAL_bx2, light_ts_bx2
+      xfc zero, zero, r0_sat, zero, zero, zero, r0.a
 
 ;   ;float3 diffuse  = albedo * CB_LIGHT_COLOR * ndotl;
 ;       mul r0, DIFFUSE, r0_sat

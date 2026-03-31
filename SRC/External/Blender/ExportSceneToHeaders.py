@@ -20,13 +20,18 @@ def float_to_byte_uv(v):
     return clamp_byte(v * 255.0)
 
 # ------------------------------------------------------------
-# Export a single mesh object → returns dict of C++ strings
+# Export a single mesh object → returns C++ block string
 # ------------------------------------------------------------
 
 def process_mesh_object(obj):
     depsgraph = bpy.context.evaluated_depsgraph_get()
     eval_obj = obj.evaluated_get(depsgraph)
     mesh = eval_obj.to_mesh()
+
+    # Ensure loop triangles, split normals, and tangents exist
+    mesh.calc_loop_triangles()
+    #mesh.calc_normals_split()
+    mesh.calc_tangents()
 
     # Bounding box ranges
     xs = [v.co.x for v in mesh.vertices]
@@ -44,16 +49,18 @@ def process_mesh_object(obj):
     unique_vertices = []
     indices = []
 
-    # Build vertices + indices
-    for poly in mesh.polygons:
-        for li in poly.loop_indices:
+    # Iterate triangulated loop triangles
+    for tri in mesh.loop_triangles:
+        for li in tri.loops:
             loop = mesh.loops[li]
             v = mesh.vertices[loop.vertex_index]
 
+            # Position → 3 bytes
             px = float_to_byte_pos(v.co.x, minx, maxx)
             py = float_to_byte_pos(v.co.y, miny, maxy)
             pz = float_to_byte_pos(v.co.z, minz, maxz)
 
+            # UV → 2 bytes
             if uv_layer:
                 uv = uv_layer[li].uv
                 uvx = float_to_byte_uv(uv.x)
@@ -62,13 +69,26 @@ def process_mesh_object(obj):
                 uvx = 0
                 uvy = 0
 
-            n = loop.normal
+            # Normal → 3 bytes
+            ln = getattr(loop, "normal", None)
+            n = ln if ln is not None else v.normal
             nx = float_to_byte_norm(n.x)
             ny = float_to_byte_norm(n.y)
             nz = float_to_byte_norm(n.z)
 
-            vt = (px, py, pz, uvx, nx, ny, nz, uvy)
+            # Tangent → 3 bytes
+            t = loop.tangent
+            tx = float_to_byte_norm(t.x)
+            ty = float_to_byte_norm(t.y)
+            tz = float_to_byte_norm(t.z)
 
+            # Padding → 1 byte
+            pad = 0
+
+            # 12‑byte vertex tuple
+            vt = (px, pz, py, uvx, nx, ny, nz, uvy, tx, ty, tz, pad)
+
+            # Deduplicate
             if vt in vertex_dict:
                 idx = vertex_dict[vt]
             else:
@@ -78,6 +98,7 @@ def process_mesh_object(obj):
 
             indices.append(idx)
 
+    # Clean up evaluated mesh
     eval_obj.to_mesh_clear()
 
     # --------------------------------------------------------
@@ -86,32 +107,39 @@ def process_mesh_object(obj):
 
     safe_name = obj.name.replace(" ", "_")
 
-    cpp = []
+    cpp_lines = []
 
-    cpp.append(f"// ------------------------------------------------------------")
-    cpp.append(f"// Object: {obj.name}")
-    cpp.append(f"// ------------------------------------------------------------\n")
+    cpp_lines.append("// ------------------------------------------------------------")
+    cpp_lines.append(f"// Object: {obj.name}")
+    cpp_lines.append("// ------------------------------------------------------------\n")
 
-    cpp.append(f"static const float g_{safe_name}_PosMin[3] = {{ {minx}f, {miny}f, {minz}f }};")
-    cpp.append(f"static const float g_{safe_name}_PosMax[3] = {{ {maxx}f, {maxy}f, {maxz}f }};\n")
+    cpp_lines.append(f"static const float g_{safe_name}_PosMin[3] = {{ {minx}f, {minz}f, {miny}f }};")
+    cpp_lines.append(f"static const float g_{safe_name}_PosMax[3] = {{ {maxx}f, {maxz}f, {maxy}f }};\n")
 
-    cpp.append(f"static const uint32_t g_{safe_name}_VertexCount = {len(unique_vertices)};")
-    cpp.append(f"static const uint32_t g_{safe_name}_IndexCount  = {len(indices)};\n")
+    cpp_lines.append(f"static const uint32_t g_{safe_name}_VertexCount = {len(unique_vertices)};")
+    cpp_lines.append(f"static const uint32_t g_{safe_name}_IndexCount  = {len(indices)};\n")
 
     # Vertex buffer
-    cpp.append(f"static const uint8_t g_{safe_name}_Vertices[] = {{")
-    for (px, py, pz, uvx, nx, ny, nz, uvy) in unique_vertices:
-        cpp.append(f"    {px}, {py}, {pz}, {uvx}, {nx}, {ny}, {nz}, {uvy},")
-    cpp.append("};\n")
+    cpp_lines.append(f"static const uint8_t g_{safe_name}_Vertices[] = {{")
+    for (px, pz, py, uvx, nx, ny, nz, uvy, tx, ty, tz, pad) in unique_vertices:
+        cpp_lines.append(
+            f"    {px}, {pz}, {py}, {uvx}, {nx}, {ny}, {nz}, {uvy}, {tx}, {ty}, {tz}, {pad},"
+        )
+    cpp_lines.append("};\n")
 
     # Index buffer
-    cpp.append(f"static const uint16_t g_{safe_name}_Indices[] = {{")
-    for i in range(0, len(indices), 12):
-        chunk = indices[i:i+12]
-        cpp.append("    " + ", ".join(str(x) for x in chunk) + ",")
-    cpp.append("};\n\n")
+    cpp_lines.append(f"static const uint16_t g_{safe_name}_Indices[] = {{")
+    row = []
+    for i, idx in enumerate(indices):
+        row.append(str(idx))
+        if (i + 1) % 12 == 0:
+            cpp_lines.append("    " + ", ".join(row) + ",")
+            row = []
+    if row:
+        cpp_lines.append("    " + ", ".join(row) + ",")
+    cpp_lines.append("};\n\n")
 
-    return "\n".join(cpp)
+    return "\n".join(cpp_lines)
 
 # ------------------------------------------------------------
 # Main Exporter — iterates ALL mesh objects
