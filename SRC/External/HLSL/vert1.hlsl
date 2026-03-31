@@ -33,7 +33,8 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
+    float2 TexCoord0 : TEXCOORD0;
+    float2 TexCoord1 : TEXCOORD1;
     float3 lightTS : COLOR0;
     float3 viewTS : COLOR1;
 };
@@ -49,7 +50,8 @@ VS_OUTPUT main(VS_INPUT IN)
     OUT.Position = mul(uViewProj, posWS);
     
     // Unpack UV (already 0–1)
-    OUT.TexCoord = float2(IN.PosPack.w, IN.NorPack.w);
+    OUT.TexCoord0 = float2(IN.PosPack.w, IN.NorPack.w);
+    OUT.TexCoord1 = OUT.TexCoord0;
     
     // Unpack normal (0–1 -> -1..1)
     float3 N = IN.NorPack.xyz * two - one;
@@ -57,8 +59,8 @@ VS_OUTPUT main(VS_INPUT IN)
     
     //N = normalize(mul(N, (float3x3) uWorld));
     //T = normalize(mul(T, (float3x3) uWorld));
-    N = normalize(N);
-    T = normalize(T);
+    N = normalize(mul((float3x3) uWorld, N));
+    T = normalize(mul((float3x3) uWorld, T));
     
     // Orthogonalize tangent (Gram–Schmidt)
     //T = normalize(T - N * dot(N, T));
@@ -73,8 +75,18 @@ VS_OUTPUT main(VS_INPUT IN)
     float3 L = normalize(uLightPosWS - posWS.xyz);
     float3 V = normalize(uCameraPosWS - posWS.xyz);
     
-    OUT.lightTS = normalize(mul(TBN, L)) * point5 + point5;
-    OUT.viewTS = normalize(mul(V, TBN)) * point5 + point5;
+    
+    float3 light_ts = normalize(mul(TBN, L));
+    float3 view_ts = normalize(mul(TBN, V));
+    
+    OUT.lightTS = light_ts * point5 + point5;
+    //OUT.viewTS = view_ts * point5 + point5;
+    
+    float3 H = normalize(light_ts + view_ts);
+    OUT.viewTS = H * point5 + point5;
+    
+    
+    
     return OUT;
 }
 

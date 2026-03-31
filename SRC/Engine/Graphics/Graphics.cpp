@@ -37,10 +37,10 @@ static void LoadSmokeTexture()
     if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\font32_64.dds", &s_smokeTex))) {
         Log("failed to load font texture", log_red);
     }
-    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\grass.dds", &s_smoke1Tex))) {
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksDiff.dds", &s_smoke1Tex))) {
         Log("failed to load grass diffuse texture", log_red);
     }
-    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\norm.dds", &s_smoke2Tex))) {
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksNormInvert.dds", &s_smoke2Tex))) {
         Log("failed to load grass normal texture", log_red);
     }
 }
@@ -101,10 +101,9 @@ HRESULT InitVB()
 
     Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_white); 
     Log("HELLO WORLD !! 12345: ", log_green, true, (void*)12345678); // BC614E
-    Log("epic funny test: ", log_green, true, (void*)0x34128967);
-    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ._:@[]\"!-+=*", log_white);
-    Log("epicfunnytest._:@[]\"!-+=*", log_red);
-    Log("ABC0123456789._:@[]\"!-+=*", log_red);
+    Log("green numbers: ", log_green, true, (void*)0x34128967);
+    Log("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:@[]\"!-+=*", log_white);
+    Log("red symbols: ABC0123456789._:@[]\"!-+=*", log_red);
     Log("string join test", log_green, false, "2nd half");
 
     return S_OK;
@@ -278,12 +277,12 @@ void Render(camera& main_camera)
     D3DXMATRIX quad_mat;
     static float quad_uppies = 0.0f;
 
-    //quad_uppies += 0.01f;
-    quad_uppies += 0.00f;
+    quad_uppies += 0.01f;
+    //quad_uppies += 0.00f;
 
 
     //D3DXMatrixTranslation(&quad_mat, 0.0f, quad_uppies, 0.0f);
-    D3DXMatrixRotationYawPitchRoll(&quad_mat, 0, quad_uppies, 0);
+    D3DXMatrixRotationYawPitchRoll(&quad_mat, quad_uppies, 0, 0);
     //D3DXMatrixIdentity(&quad_mat);
     g_pd3dDevice->SetTransform(D3DTS_WORLD, &quad_mat);
     g_pd3dDevice->SetStreamSource(0, g_p2VB, 12);
@@ -307,12 +306,12 @@ void Render(camera& main_camera)
 
     
     static float light_angle = 0.0f;
-    //light_angle += 0.00f;
-    light_angle += 0.01f;
-    float radius = 2.0f;
+    light_angle += 0.00f;
+    //light_angle += 0.01f;
+    float radius = 2.2f;
     float lx = cosf(light_angle) * radius;
     float lz = sinf(light_angle) * radius;
-    float ly = 0.5f;  
+    float ly = 2.f;  
     float c8[4] = { lx,ly,lz, 0.0f };
 
     g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
@@ -323,7 +322,7 @@ void Render(camera& main_camera)
     g_pd3dDevice->SetVertexShaderConstant(11, g_Cube001_PosMax, 1);
     g_pd3dDevice->SetVertexShaderConstant(12, c12, 1);
 
-    float ps_c0[4] = { 0.6f, 0.6f, 0.6f, 1.0f, };
+    float ps_c0[4] = { 0.9f, 0.9f, 0.9f, 1.0f, };
     float ps_c1[4] = { 0.1f, 0.1f, 0.1f, 1.0f, };
     g_pd3dDevice->SetPixelShaderConstant(0, ps_c0, 1);
     g_pd3dDevice->SetPixelShaderConstant(1, ps_c1, 1);
