@@ -15,7 +15,7 @@ xps.1.1  ; Xbox pixel shader version 1.1
 #define light_ts v0
 #define light_ts_bx2 v0_bx2
 #define view_ts v1
-#define view_ts_bx2 v1
+#define view_ts_bx2 v1_bx2
 
 #define CB_LIGHT_COLOR c0
 #define CB_AMBIENT_COLOR c1
@@ -57,9 +57,15 @@ xps.1.1  ; Xbox pixel shader version 1.1
 
 ;float3 specular = CB_LIGHT_COLOR * pow(ndoth, uSpecPower) * uSpecIntensity;
     mul r1, r1_sat, r1_sat
-    mul r1, r1_sat, r1_sat
+    mul r1, r1, r1
+    
+    ; just specular view
+    ;xfc prod, CB_LIGHT_COLOR, zero, zero, r1, r1, r0.a
 
-    ;xfc r1, CB_LIGHT_COLOR, zero, r0, zero, zero, r0.a
-    xfc zero, zero, zero, r0, zero, zero, r0.a
+    ; just normal view
+    ;xfc zero, zero, zero, r0, zero, zero, r0.a
+
+    ; normal + specular
+    xfc r1, CB_LIGHT_COLOR, zero, r0, zero, zero, r0.a
 
 ; NOTE: not possible

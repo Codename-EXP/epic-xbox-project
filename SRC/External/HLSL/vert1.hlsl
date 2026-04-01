@@ -74,16 +74,18 @@ VS_OUTPUT main(VS_INPUT IN)
     
     float3 L = normalize(uLightPosWS - posWS.xyz);
     float3 V = normalize(uCameraPosWS - posWS.xyz);
-    
+    float3 H = normalize(L + V);
     
     float3 light_ts = normalize(mul(TBN, L));
-    float3 view_ts = normalize(mul(TBN, V));
+    float3 view_ts = normalize(mul(TBN, H));
+    
+    
     
     OUT.lightTS = light_ts * point5 + point5;
-    //OUT.viewTS = view_ts * point5 + point5;
+    OUT.viewTS = view_ts * point5 + point5;
     
-    float3 H = normalize(light_ts + view_ts);
-    OUT.viewTS = H * point5 + point5;
+    //float3 H = normalize(light_ts + view_ts);
+   // OUT.viewTS = H * point5 + point5;
     
     
     

@@ -322,7 +322,7 @@ void Render(camera& main_camera)
     g_pd3dDevice->SetVertexShaderConstant(11, g_Cube001_PosMax, 1);
     g_pd3dDevice->SetVertexShaderConstant(12, c12, 1);
 
-    float ps_c0[4] = { 0.9f, 0.9f, 0.9f, 1.0f, };
+    float ps_c0[4] = { 0.3f, 0.9f, 0.3f, 1.0f, };
     float ps_c1[4] = { 0.1f, 0.1f, 0.1f, 1.0f, };
     g_pd3dDevice->SetPixelShaderConstant(0, ps_c0, 1);
     g_pd3dDevice->SetPixelShaderConstant(1, ps_c1, 1);
