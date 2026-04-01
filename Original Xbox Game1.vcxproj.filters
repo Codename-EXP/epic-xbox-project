@@ -93,4 +93,8 @@
     <None Include="SRC\External\Blender\ExportSceneToBinary.py" />
     <None Include="SRC\External\Blender\ExportSceneToHeaders.py" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\BricksBinaryAlpha.dds" />
+    <Image Include="..\..\..\BricksQualityAlpha.dds" />
+  </ItemGroup>
 </Project>

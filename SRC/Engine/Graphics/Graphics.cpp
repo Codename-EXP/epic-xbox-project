@@ -40,7 +40,8 @@ static void LoadSmokeTexture()
     if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksDiff.dds", &s_smoke1Tex))) {
         Log("failed to load grass diffuse texture", log_red);
     }
-    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksNormInvert.dds", &s_smoke2Tex))) {
+    //if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksNormInvert.dds", &s_smoke2Tex))) {
+    if (FAILED(D3DXCreateTextureFromFileA(g_pd3dDevice, "D:\\test\\BricksQualityAlpha.dds", &s_smoke2Tex))) {
         Log("failed to load grass normal texture", log_red);
     }
 }
@@ -322,7 +323,7 @@ void Render(camera& main_camera)
     g_pd3dDevice->SetVertexShaderConstant(11, g_Cube001_PosMax, 1);
     g_pd3dDevice->SetVertexShaderConstant(12, c12, 1);
 
-    float ps_c0[4] = { 0.3f, 0.9f, 0.3f, 1.0f, };
+    float ps_c0[4] = { 0.85f, 0.85f, 0.85f, 1.0f, };
     float ps_c1[4] = { 0.1f, 0.1f, 0.1f, 1.0f, };
     g_pd3dDevice->SetPixelShaderConstant(0, ps_c0, 1);
     g_pd3dDevice->SetPixelShaderConstant(1, ps_c1, 1);
@@ -331,6 +332,55 @@ void Render(camera& main_camera)
     g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
 
 
+    {
+        D3DXMATRIX r, m;
+        D3DXMatrixRotationYawPitchRoll(&r, quad_uppies, 0, 0);
+        D3DXMatrixTranslation(&m, 0, 0, 3);
+        quad_mat = r * m;
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+    }
+
+    {
+        D3DXMATRIX r, m;
+        D3DXMatrixRotationYawPitchRoll(&r, quad_uppies, 0, 0);
+        D3DXMatrixTranslation(&m, 0, 0, -3);
+        quad_mat = r * m;
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+    }
+
+
+
+    {
+        D3DXMATRIX r, m;
+        D3DXMatrixRotationYawPitchRoll(&r, 0, 0, 0);
+        D3DXMatrixTranslation(&m, -3, 0, 0);
+        quad_mat = r * m;
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+    }
+    {
+        D3DXMATRIX r, m;
+        D3DXMatrixRotationYawPitchRoll(&r, 0, 0, 0);
+        D3DXMatrixTranslation(&m, -3, 0, 3);
+        quad_mat = r * m;
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+    }
+    {
+        D3DXMATRIX r, m;
+        D3DXMatrixRotationYawPitchRoll(&r, 0, 0, 0);
+        D3DXMatrixTranslation(&m, -3, 0, -3);
+        quad_mat = r * m;
+
+        g_pd3dDevice->SetVertexShaderConstant(0, &quad_mat, 4);
+        g_pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 0, g_Cube001_IndexCount / 3);
+    }
 
 
 

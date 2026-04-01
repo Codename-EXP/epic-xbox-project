@@ -208,6 +208,10 @@ MKDIR "$(OutDir)XISO"
     <None Include="SRC\External\Blender\ExportSceneToBinary.py" />
     <None Include="SRC\External\Blender\ExportSceneToHeaders.py" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\BricksBinaryAlpha.dds" />
+    <Image Include="..\..\..\BricksQualityAlpha.dds" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

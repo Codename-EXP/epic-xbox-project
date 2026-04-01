@@ -27,14 +27,21 @@ xps.1.1  ; Xbox pixel shader version 1.1
   ;float3 NORMAL = tex2D(sNormal, IN.uv).xyz;
   ;NORMAL = normalize(NORMAL * 2.0f - 1.0f);
       tex NORMAL ; use _bx2 to convert from [0,1] to [-1,1]
-  
+        
   ;float3 albedo = tex2D(DIFFUSE, IN.uv).rgb;
       tex DIFFUSE
+
+      ;mov r1.rgb, NORMAL
+      ;mov r1.a, DIFFUSE.b
+      
   
-  ;float3 L = normalize(IN.light_ts);
-  ;float ndotl = saturate(dot(NORMAL, L));
-      dp3 r0, NORMAL_bx2, light_ts_bx2
-      ;xfc zero, zero, r0_sat, zero, zero, zero, r0.a
+;float3 L = normalize(IN.light_ts);
+;float ndotl = saturate(dot(NORMAL, L));
+;float3 V = normalize(IN.viewTS);
+;float3 H = normalize(L + V);
+;float ndoth = saturate(dot(NORMAL, H));
+      xdd r0, r1, NORMAL_bx2, light_ts_bx2, NORMAL_bx2, view_ts_bx2
+
 
    ;float3 diffuse  = albedo * CB_LIGHT_COLOR * ndotl;
        mul r0, DIFFUSE, r0_sat
@@ -49,23 +56,27 @@ xps.1.1  ; Xbox pixel shader version 1.1
 ;float  uSpecPower;
 ;float  uSpecIntensity;
 
-;float3 V = normalize(IN.viewTS);
-;float3 H = normalize(L + V);
-;float ndoth = saturate(dot(NORMAL, H));
-      dp3 r1, NORMAL_bx2, view_ts_bx2
 
 
 ;float3 specular = CB_LIGHT_COLOR * pow(ndoth, uSpecPower) * uSpecIntensity;
     mul r1, r1_sat, r1_sat
     mul r1, r1, r1
+    mul r1, r1, r1
     
+    
+    ; normal + specular * specular map
+    xfc prod, NORMAL.a, zero, r0, r1, CB_LIGHT_COLOR, r0.a
+
+    ; only specular + specular map
+    ; xfc prod, NORMAL.a, zero, zero, r1, CB_LIGHT_COLOR, r0.a
+
     ; just specular view
-    ;xfc prod, CB_LIGHT_COLOR, zero, zero, r1, r1, r0.a
+    ; xfc prod, CB_LIGHT_COLOR, zero, zero, r1, r1, r0.a
 
     ; just normal view
     ;xfc zero, zero, zero, r0, zero, zero, r0.a
 
     ; normal + specular
-    xfc r1, CB_LIGHT_COLOR, zero, r0, zero, zero, r0.a
+    ; xfc r1, CB_LIGHT_COLOR, zero, r0, zero, zero, r0.a
 
 ; NOTE: not possible
